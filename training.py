@@ -1,15 +1,22 @@
 #for training part in classification
 from normalization import expectSTDevList
-from misc import partitionSampleByMetadatumValue
+from misc import partitionSampleByMetadatumValue,mem
 from randomSampling import randomChoice
 import numpy as np
 
-#dataArray = [samplesInfoList,infoList,paths,n,nodesList,taxoTree,sampleIDList,featuresVectorList,matchingSequences]
+#dataArray = [samplesInfoList,infoList,paths,n,nodesList,taxoTree,sampleIDList,featuresVectorList,matchingNodes]
+
+#MISSING LINK BETWEEN SAMPLES IN @MATCHINGNODES AND @FEATURESVECTORLIST
+def convertFeaturesIntoMatching(featuresVectorList,matchingNodes,sampleID):
+    return sampleID
+
+def convertMatchingIntoFeatures(featuresVectorList,matchingNodes,sampleID):
+    return sampleID
 
 #Computes classes according to metadatum values
 def computeClasses(dataArray,metadatum):
     #Any value in @valueSet is an integer (see partitionSampleByMetadatumValue)
-    #@classes is a list containing partition of the samples according to the value of the metadatum
+    #@classes is a list containing partition of the samples ID according to the value of the metadatum
     valueSet,classes = partitionSampleByMetadatumValue([metadatum],dataArray[1],dataArray[0])
     if not valueSet:
         print "\n/!\ ERROR: metadatum",metadatum,"having abnormal values."
@@ -26,8 +33,9 @@ def selectTrainingSample(dataArray,n,knuth=False):
 def giveValueMetadatum(featureVector,metadatum):
     #if @featureVector is not a pair
     if not (len(featureVector) == 2):
-        print "\n/!\ ERROR: Feature vector error: length",len(featureVector)
+        print "\n/!\ ERROR: Feature vector error: length",len(featureVector),"."
         raise ValueError
+    #list of (metadatum,value) pairs
     ls = featureVector[1]
     for pair in ls:
         if not (len(pair) == 2):
@@ -39,6 +47,7 @@ def giveValueMetadatum(featureVector,metadatum):
     print "\n/!\ ERROR: This metadatum",metadatum,"does not exist in the feature vector of sample",featureVector[0],"."
     raise ValueError
 
+#To get the number of the class associated
 def getNumberValueSet(valueSet,value):
     n = len(valueSet)
     while i < n and not (valueSet[i] == value):
@@ -49,41 +58,107 @@ def getNumberValueSet(valueSet,value):
     else:
         return i
 
-#Training step #2: according to the values metadatum, assigns a class to each sample of this subset
-#@classes (see @computeClasses) is the known partition of the whole set of samples, that will be useful to
+#Training step #2: according to the values of metadatum, assigns a class to each sample of this subset
+#@classes (see @computeClasses) is the known partition of the whole set of samples ID, that will be useful to
 #compute the Youden's J coefficient
-#@assignedClasses is the partial partition of the set of samples restricted to the samples in @trainSubset
-#MISSING LINK BETWEEN SAMPLES IN MATCHING SEQUENCES AND FEATURE VECTOR
+#returns @assignedClasses that is the partial partition of the set of samples restricted to the samples in @trainSubset
 def assignClass(trainSubset,classes):
+    #Since it is a binary classifier
+    if not (len(classes) == 2):
+        print "\n/!\ ERROR: classes length error: length",len(classes),"."
+        raise ValueError
+    n1 = len(classes[0])
+    n2 = len(classes[1])
+    assignedClasses = [[],[]]
     for featureVector in trainSubset:
-        #dimensions to access to the class
-        finalClass = []
-        n = len(metadatum)
-        for i in range(n):
-            value = giveValueMetadatum(featureVector,metadataList[i]))
-            dim = getNumberValueSet(valueSets[i],value)
-            finalClass.append(dim)
-        #Assign the whole feature vector to this class
-        previousClass = accessMDL(finalClass,shape,classes)
-        newValue = previousClass.append(featureVector)
-        classes = modifyMDL(finalClass,newValue,shape,classes)
-    return classes
-
-#Link between @featuresVectors and @matchingSequences?
-#@idSequences contains (sequence ID,reads matching) pairs
-#@matchingSequences 
-def getExpectSTdev(matchingSequences,idSequences):
-    ()
+        #if @featureVector is not a pair
+        if not (len(featureVector) == 2):
+            print "\n/!\ ERROR: Feature vector error: length",len(featureVector),"."
+            raise ValueError
+        sampleID = featureVector[0]
+        i = 0
+        isInClass1 = False
+        while i < n1 and not (sampleID == classes[0][i]):
+            i += 1
+        if (i == n1):
+            i = 0
+            while i < n2 and not (sampleID == classes[1][i]):
+                i += 1
+            if (i == n2):
+                print "\n/!\ ERROR: Sample ID",sampleID,"is not in the classes",classes[0],"\nnor",classes[1],"."
+                raise ValueError
+            #else isInClass2 == False
+        else:
+            isInClass1 = True
+        if isInClass1:
+            assignedClasses[0] = assignedClasses[0].append(sampleID)
+        else:
+            assignedClasses[1] = assignedClasses[1].append(sampleID)
+    return assignedClasses
 
 #Training step #3: computes expectation and standard deviation for the different criteria over nodes for each class
-def computeExpect(dataArray,assignedClasses,shape,nodesList):
-    expectSTDevList
-    
-def trainingPart(dataArray,metadataList,nodesList):
-    classes,shape,valueSets = computeClasses(dataArray,metadataList)
+#@nodesList is the list of (name,rank) of considered nodes
+#@matchingNodes contains (sampleID,list of nodes (name,rank) matching a read in this sample) pairs
+def getListFromMatchingNodes(matchingNodes,sampleID):
+    i = 0
+    n = len(matchingNodes)
+    while i < n and not (matchingNodes[i][0] == sampleID):
+        if not (len(matchingNodes[i]) == 2):
+            print "\n/!\ ERROR: matchingNodes formatting incorrect: length:",len(matchingNodes[i]),"."
+            raise ValueError
+        i += 1
+    if (i == n):
+        print "\n/!\ ERROR: Sample",sampleID,"not in matchingNodes."
+        raise ValueError
+    else:
+        return matchingNodes[i]
+
+def getPlaceInNodesList(node,nodesList,n):
+    i = 0
+    while i < n and not (node == nodesList[i]):
+        i += 1
+    if (i == n):
+        print "\n/!\ ERROR: Node",node,"is not in nodesList",nodesList,"."
+        raise ValueError
+    else:
+        return i
+
+#@n = len(@nodesList)
+#@m = len(@class1)
+def computeExpectSTDev(dataArray,class1,nodesList,n,m):
+    #@valuesClass contains (expectation,standard deviation) pairs for each node in @nodesList
+    valuesClass = []
+    #@nodesPresence[i][j] = 1 if @nodesList[i] matches a read in @class1[j], otherwise 0
+    nodesPresence = [[0]*m]*n
+    for i in range(m):
+        sampleIDNode = convertFeaturesIntoMatching(dataArray[7],dataArray[8],class1[i])
+        nodesListMatch = getListFromMatchingNodes(dataArray[8],sampleIDNode)
+        for node in nodesList:
+            if not (len(node) == 2):
+                print "\n/!\ ERROR: node error: length",len(node),"."
+                raise ValueError
+            elif mem(node,nodesListMatch):
+                index = getPlaceInNodesList(node,nodesList,n)
+                #see @getPlaceInNodesList: i < n 
+                nodesPresence[index][i] = 1
+    for i in range(n):
+        expectation,stdev = expectSTDevList(nodesPresence[i])
+        valuesClass.append((expectation,stdev))
+    return valuesClass
+
+#Returns @classes, which is the partition of the whole set of samples according to the values of metadatum
+#and @assignedClasses the partial partition of the training subset of samples
+#and @valuesClasses is the list of lists of (expectation,standard deviation) pairs for each node considered
+def trainingPart(dataArray,metadatum,nodesList):
+    n = len(nodesList)
+    classes = computeClasses(dataArray,metadatum)
     #len(classes): enough? 
     trainSubset = selectTrainingSample(dataArray,len(classes))
-    assignedClasses = assignClass(dataArray,trainSubset,classes,shape,valueSets,metadataList)
-    valuesClasses = computeExpect(dataArray,assignedClasses,shape,nodesList)
-    return valuesClasses,assignedClasses,shape
+    assignedClasses = assignClass(dataArray,trainSubset,classes)
+    #len(@assignedClasses) == 2 (see @assignClass)
+    m1 = len(assignedClasses[0])
+    m2 = len(assignedClasses[1])
+    valuesClass1 = computeExpectSTDev(dataArray,assignedClasses[0],nodesList,n,m1)
+    valuesClass2 = computeExpectSTDev(dataArray,assignedClasses[1],nodesList,n,m2)
+    return classes,assignedClasses,[valuesClass1,valuesClass2]
     

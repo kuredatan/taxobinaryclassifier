@@ -15,7 +15,7 @@ from randomSampling import randomChoice
 
 from plottingValues import plotPearsonGraph,plotGraph,plotHist,plotPie
 
-#@dataArray = [samplesInfoList,infoList,paths,n,nodesList,taxoTree,sampleIDList,featuresVectorList,matchingSequences,idSequences,phyloSequences]
+#@dataArray = [samplesInfoList,infoList,paths,n,nodesList,taxoTree,sampleIDList,featuresVectorList,matchingNodes]
 
 integer = re.compile("[0-9]+")
 
@@ -193,11 +193,10 @@ def userNodeSelectionAct(dataArray):
     isInDatabase([metadatum],dataArray[1])
     nodesList = parseListNode(raw_input("Choose the group of nodes you want to consider exclusively. [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[4][-3]) + ";" + sanitizeNode(dataArray[4][1]) + ";" + sanitizeNode(dataArray[4][-1]) + " ]\n"))
     isInDatabase(nodesList,dataArray[4])
-    #@classesList contains the lists of samples, each list being a distinct class
-    classesList = classifyIt(dataArray,metadatum,nodesList)
-    youdenJ = countYouden(classesList,metadatum)
+    assignedClasses,classes = classifyIt(dataArray,metadatum,nodesList)
+    youdenJ = countYouden(assignedClasses,classes)
     interpretIt(youdenJ)
-    return classesList,youdenJ
+    return assignedClasses,youdenJ
 
 def randomSubSamplingAct(dataArray):
     print dataArray[1]
@@ -218,15 +217,15 @@ def randomSubSamplingAct(dataArray):
     while s:
         #Randomly draw n distinct nodes among the nodes in the taxonomic tree
         nodesList = randomChoice(dataArray[4],n)
-        classesList = classifyIt(dataArray,metadatum,nodesList)
-        youdenJ = countYouden(classesList,metadatum)
+        assignedClasses,classes = classifyIt(dataArray,metadatum,nodesList)
+        youdenJ = countYouden(assignedClasses,classes)
         if max(youdenJ,currBestYouden) == youdenJ:
             bestClassification = []
             for i in nodesList:
                 bestClassification.append(i)
             currBestYouden = youdenJ
             bestClassesList = []
-            for i in classesList:
+            for i in assignedClasses:
                 bestClassesList.append(i)
         s -= 1
     interpretIt(currBestYouden)

@@ -43,9 +43,9 @@ def main():
     taxoTree = TaxoTree("Root").addNode(paths,nodesList,samplesOccList)
     print "-- End of construction\n"
     print "/!\ Constructing the features vectors..."
-    featuresVectorList,matchingSequences,idSequences,phyloSequences = featuresCreate(sampleInfoList,infoList,filenames,fastaFileName)
+    featuresVectorList,matchingNodes = featuresCreate(sampleInfoList,infoList,filenames,fastaFileName)
     print "-- End of construction\n"
-    dataArray = [samplesInfoList,infoList,paths,n,nodesList,taxoTree,sampleIDList,featuresVectorList,matchingSequences,idSequences,phyloSequences]
+    dataArray = [samplesInfoList,infoList,paths,n,nodesList,taxoTree,sampleIDList,featuresVectorList,matchingNodes]
     answer = ""
     while not ((answer == "exit") or (answer == "exit()") or (answer == "quit")):
         try:
