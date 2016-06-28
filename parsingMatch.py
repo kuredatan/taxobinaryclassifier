@@ -1,8 +1,8 @@
 from misc import sanitize
 
-#Returns the list of pairs (identifier of read,list of identifiers of sequences matching this read) associated to patient whose MATCH file is @filename
+#Returns the pair (identifier of patient a.k.a. @filename,list of identifiers of sequences matching a read in this patient)
 def parseMatch(filename):
-    allReads = []
+    allSequences = []
     file_match = open("meta/match/" + filename + ".match","r")
     lines = file_match.readlines()
     file_match.close()
@@ -16,15 +16,13 @@ def parseMatch(filename):
         if len(lsClean) < 1:
             print "\n/!\ ERROR: MATCH parsing error:",len(lsClean),"."
             raise ValueError
-        allReads.append((lsClean[0],lsClean[1:]))
-    return allReads
+        allSequences += lsClean[1:]
+    return (filename,allSequences)
 
-#Returns the list of identifiers of patients @idPatients in the file
-#and the array @allMatches such as @allMatches[i] is a pair (identifier of read,list of identifiers of sequences matching this read) associated to patient @idPatients[i]
+#Returns the list @allMatches such as @allMatches[i] is a pair (identifier of patient,list of identifiers of sequences matching a read in this patient) 
 def parseAllMatch(filenames):
-    idPatients = filenames
     allMatches = []
-    for ident in idPatients:
-        allMatches.append(parseMatch(ident))
-    return idPatients,allMatches
+    for filename in filenames:
+        allMatches.append(parseMatch(filename))
+    return allMatches
     

@@ -17,16 +17,16 @@ In the terminal:
 
 -----------------------------------------------------------------------------------------------------------------
 
-This program uses a Naive Bayes Classifier to infer correlations between metadata and the phylogenetic trees in samples. The classifier classifies a sample/patient in a classe corresponding to a certain list of values for a fixed set of metadata.
+This program uses a Naive Bayes Classifier to infer correlations between metadata and the phylogenetic trees in samples. The classifier classifies a sample/patient in a classe corresponding to a certain list of values for a fixed metadatum. It is the binary version of TaxoClassifier.
 
 A sample/patient is defined with a features vector, containing the numeric values (boolean values are 0 and 1) corresponding to every metadatum collected, and a phylogenetic vector, containing for each node n of the phylogenetic tree a list of read numbers r such as n matches the read r. 
 
-1) User firstly chooses the metadata to cluster the samples.
+1) User firstly chooses the metadatum to cluster the samples.
 2) User can choose between these two options:
     a) User may select the nodes of interest, and the algorithm focuses exclusively on these nodes to classify the samples.
     b) User may choose two integers s and n. The algorithm then launches s random sub-samplings so as it returns the set of n nodes which classifies the best (according to Youden's J statistic, see below) the set of samples. 
 
-A set of samples is randomly selected to train the algorithm (it may add a probability if there is no sample of a given value of metadatum to avoid the problem of zero-probabilities). The algorithm computes for each node of interest the expectation and standard deviation of the number of match in every sample to this node. These samples will be affected to the different class according to their metadata values.
+A set of samples is randomly selected to train the algorithm (it may add a probability if there is no sample of a given value of metadatum to avoid the problem of zero-probabilities). The algorithm computes for each node of interest the expectation and standard deviation of the number of match in every sample to this node. These samples will be affected to the different class according to their metadatum values.
 
 Then for every sample s that does not belong to the training set, the algorithm will assign the most probable class to s (classic calculus with Bayesian hypotheses).
 
@@ -38,7 +38,7 @@ FN(c) are False Negative (the number of samples not assigned to C and matching C
 FP(c) are False Positive (the number of samples assigned to C and not matching C),
 and TN(c) are True Negative (the number of samples not assigned to C and not matching C).
 
-The best classification is the classification such as, for all class C, J(c) is the closest to 1 (that is, such as, if n is the sum of the J(C) for all s C, s - n is minimum and non-negative).
+The best classification is the classification such as, for all class C, J(c) is the closest to 1 (that is, such as, if n = J(C) + J(not C), 2 - n is minimum and non-negative).
 
 -----------------------------------------------------------------------------------------------------------------
 
@@ -95,6 +95,6 @@ Helps saving results in files.
 
 Comments:
 
-*** Before starting TAXOCLASSIFIER ***
+*** Before starting TAXOBINARYCLASSIFIER ***
 - Create a folder entitled "files" to store your results.
 

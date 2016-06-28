@@ -1,11 +1,25 @@
 from parsingMatch import parseAllMatch
 from parsingFasta import parseFasta
 
-#Creates for each patient the corresponding features vector, that is:
-#@name: name of sample/patient
-#for each metadatum, (metadatum,value for this patient in the data matrix)
-#a list of couples (node,list of IDs of read such as node matches these read in this sample)
-#(this is more efficient than an array of all nodes)
+#Creates for each patient the corresponding features vector and matching nodes, that is:
+#@featuresVectorList is the list of @featuresVector such as @featuresVector is a pair
+#(@name of sample/patient,list of (metadatum,value for this patient in the data matrix) pairs)
+#and @matchingNodes is the list of pairs (name of patient,list of nodes matched in this sample that is a (name,rank) list)
+
+#Default phylogeny is GreenGenes'
+def getNextRank(rank,ranks=["R","K","P","C","O","F","G","S"]):
+    i = 0
+    n = len(ranks)
+    while i < n and not (rank == ranks[i]):
+        i += 1
+    if (i == n):
+        print "\n/!\ ERROR: Wrong phylogeny (1). Please change the ranks array in featuresVector.py."
+        raise ValueError
+    elif (i == n-1):
+        print "\n/!\ ERROR: Wrong phylogeny (2). Please change the ranks array in featuresVector.py."
+        raise ValueError
+    else:
+        return ranks[i+1]
 
 def getCorrespondingID(sequenceID,idSequences):
     i = 0
@@ -17,31 +31,43 @@ def getCorrespondingID(sequenceID,idSequences):
         raise ValueError
     return i
 
-#@matches is a list of (read ID,sequences ID matching this read) pairs
-#returns a list of ID reads that @sequenceID matches
-def getMatchingReads(sequenceID,matches):
-    readsMatching = []
-    for pair in matches:
+def getNodeAssociated(sequenceID,idSequences,phyloSequences):
+    index = getCorrespondingID(sequenceED,idSequences)
+    if not (len(phyloSequences[index][-1]) == 2):
+        print "\n/!\ ERROR: [BUG] [featuresVector/getNodeAssociated] Wrong node length:",len(phyloSequences[index][-1]),"."
+        raise ValueError
+    fatherRank = phyloSequences[index][-1][1]
+    rank = getNextRank(fatherRank)
+    if not (len(idSequences[index]) == 2):
+        print "\n/!\ ERROR: [BUG] [featuresVector/getNodeAssociated] Wrong pair length:",len(idSequences[index]),"."
+        raise ValueError
+    name = idSequences[index][1]
+    return (name,rank)
+
+#@allMatches is a list of (sample ID,list of sequences ID matching a read in this sample) pairs (see parsingMatch.py)
+#returns a list of (sample ID,list of nodes (name,rank) matching a read in this sample) pairs
+def getMatchingNodes(allMatches,idSequences,phyloSequences):
+    matchingNodes = []
+    for pair in allMatches:
         if not len(pair) == 2:
             print "\n/!\ ERROR: Incorrect matches formatting."
             raise ValueError
-        readID = pair[0]
-        idMatching = pair[1]
-        n = len(idMatching)
-        i = 0
-        while i < n and not idMatching[i] == sequenceID:
-            i += 1
-        if not (i == n):
-            readsMatching.append(readID)
-    return readsMatching
+        sampleID = pair[0]
+        matchingSequences = pair[1]
+        matchingThisSampleNodes = []
+        for sequenceID in matchingSequences:
+            matchingThisSampleNodes.append(getNodeAssociated(sequenceID,idSequences,phyloSequences))
+        matchingNodes.append((sampleID,matchingThisSampleNodes))
+    return matchingNodes
         
-#Returns a list of features vectors
+#Returns @featuresVectorList and @matchingNodes
+#@filenames is the list of .match file names
+#@fastaFileName is a string of the .fasta file name
 def featuresCreate(sampleInfoList,infoList,filenames,fastaFileName):
-    featuresVectorList = []
     print "/!\ Parsing .match files"
     print "[ You may have to wait a few minutes... ]"
     try:
-        idPatients,allMatches = parseAllMatch(filenames)
+        allMatches = parseAllMatch(filenames)
     except IOError:
         print "\nERROR: Maybe the filename you gave does not exist in \"meta/matches\" folder\n"
     print "/!\ Parsing .fasta files"
@@ -51,8 +77,8 @@ def featuresCreate(sampleInfoList,infoList,filenames,fastaFileName):
     except IOError:
         print "\nERROR: Maybe the filename you gave does not exist in \"meta\" folder\n"    
     #Link between file name and sample name?
-    #As it is for now unknown, @featuresCreate returns the features vector list @featuresVectorList (name of sample,metadataList) list
-    #+ the list of couples (node,ID reads) apart @matchingSequences
+    #--------------CONSTRUCTING @featuresVectorList
+    featuresVectorList = []
     for sample in sampleInfoList:
         print sample[0]
         n = len(sample)
@@ -63,20 +89,12 @@ def featuresCreate(sampleInfoList,infoList,filenames,fastaFileName):
         for i in range(1,n):
             metadataList.append((infoList[i],sample[i]))
         featuresVectorList.append((sample[0],metadataList))
-    n = len(allMatches)
-    #For each patient @idPatient[i]
-    matchingSequences = []
-    for i in range(n):
-        print idPatient[i]
-        matchingPatient = []
-        for sequenceID in idSequences:
-            readsMatching = getMatchingReads(sequenceID,allMatches[i])
-            matchingPatient.append((sequenceID,readsMatching))
-        matchingSequences.append((idPatient[i],matchingPatient))
-    return featuresVectorList,
+    #--------------CONSTRUCTING @matchingNodes
+    matchingNodes = getMatchingNodes(allMatches,idSequences,phyloSequences)
+    return featuresVectorList,matchingNodes
 
 def test():
     from parsingInfo import parseInfo
     sampleInfoList,infoList = parseInfo("Info")
-    featuresVectorList,matchingSequences = featuresCreate(sampleInfoList,infoList)
+    featuresVectorList,matchingNodes = featuresCreate(sampleInfoList,infoList)
     return featuresVectorList[:3],matchingSequences[:3]

@@ -8,9 +8,10 @@ from parsingMatrix import parseMatrix,importMatrix
 from parsingInfo import parseInfo
 from parsingTree import parseTree
 from taxoTree import TaxoTree,printTree
-from misc import getValueBacteriaBacteria,getValueBacteriaMetadata,mem,isInDatabase,getMaxMin,partitionSampleByMetadatumValue
+from misc import getValueBacteriaBacteria,getValueBacteriaMetadata,mem,isInDatabase,getMaxMin,partitionSampleByMetadatumValue,sanitize
 from classifier import classifyIt
 from youden import countYouden,interpretIt
+from randomSampling import randomChoice
 
 from plottingValues import plotPearsonGraph,plotGraph,plotHist,plotPie
 
@@ -188,26 +189,27 @@ def createSampleNameList(dataArray,percentage=False):
 #See featuresVector.py and README for more details about features vectors.
 def userNodeSelectionAct(dataArray):
     print dataArray[1]
-    metadataList = parseList(raw_input("Input the list of metadata that will cluster the set of samples among those written above. [ e.g. " + dataArray[1][0] + ";" + dataArray[1][-1] + " ]\n"))
-    isInDatabase(metadataList,dataArray[1])
+    metadatum = sanitize(raw_input("Input the metadatum that will cluster the set of samples among those written above. [ e.g. " + dataArray[1][0] + " ]\n")).split(";")[0]
+    isInDatabase([metadatum],dataArray[1])
     nodesList = parseListNode(raw_input("Choose the group of nodes you want to consider exclusively. [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[4][-3]) + ";" + sanitizeNode(dataArray[4][1]) + ";" + sanitizeNode(dataArray[4][-1]) + " ]\n"))
-    isInDatabase(valueInput1,dataArray[4])
+    isInDatabase(nodesList,dataArray[4])
     #@classesList contains the lists of samples, each list being a distinct class
-    classesList = classifyIt(dataArray,metadataList,nodesList)
-    youdenJ = countYouden(classesList,metadataList)
+    classesList = classifyIt(dataArray,metadatum,nodesList)
+    youdenJ = countYouden(classesList,metadatum)
     interpretIt(youdenJ)
     return classesList,youdenJ
 
 def randomSubSamplingAct(dataArray):
     print dataArray[1]
-    metadataList = parseList(raw_input("Input the list of metadata that will cluster the set of samples among those written above. [ e.g. " + dataArray[1][0] + ";" + dataArray[1][-1] + " ]\n"))
-    isInDatabase(metadataList,dataArray[1])
+    metadatum = sanitize(raw_input("Input the metadatum that will cluster the set of samples among those written above. [ e.g. " + dataArray[1][0] + " ]\n")).split(";")[0]
+    isInDatabase([metadatum],dataArray[1])
     s = raw_input("Input the number s of random samplings.")
     n = raw_input("Input the number n of nodes to select at each try.")
     if not integer.match(s) or not integer.match(n):
         print "\n/!\ ERROR: s and n must both be integers."
         raise ValueError
     s,n = int(s),int(n)
+    #Here the set of classes is a list of two lists containing the samples in C and not C
     bestClassification = []
     bestClassesList = []
     #Worse value for this coefficient
@@ -215,9 +217,9 @@ def randomSubSamplingAct(dataArray):
     nodesNumber = dataArray[3]
     while s:
         #Randomly draw n distinct nodes among the nodes in the taxonomic tree
-        nodesList = []
-        classesList = classifyIt(dataArray,metadataList,nodesList)
-        youdenJ = countYouden(classesList,metadataList)
+        nodesList = randomChoice(dataArray[4],n)
+        classesList = classifyIt(dataArray,metadatum,nodesList)
+        youdenJ = countYouden(classesList,metadatum)
         if max(youdenJ,currBestYouden) == youdenJ:
             bestClassification = []
             for i in nodesList:
@@ -227,6 +229,7 @@ def randomSubSamplingAct(dataArray):
             for i in classesList:
                 bestClassesList.append(i)
         s -= 1
+    interpretIt(currBestYouden)
     return bestClassification,currBestYouden,bestClassesList
 
 #_____________________________________________________________________________
