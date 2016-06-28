@@ -8,7 +8,7 @@ from parsingMatrix import parseMatrix,importMatrix
 from parsingInfo import parseInfo
 from parsingTree import parseTree
 from taxoTree import TaxoTree,printTree
-from misc import getValueBacteriaBacteria,getValueBacteriaMetadata,mem,isInDatabase,getMaxMin,partitionSampleByMetadatumValue,sanitize
+from misc import getValueBacteriaBacteria,getValueBacteriaMetadata,mem,isInDatabase,getMaxMin,partitionSampleByMetadatumValue,sanitize,inf
 from classifier import classifyIt
 from youden import countYouden,interpretIt
 from randomSampling import randomChoice
@@ -194,9 +194,11 @@ def userNodeSelectionAct(dataArray):
     nodesList = parseListNode(raw_input("Choose the group of nodes you want to consider exclusively. [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[4][-3]) + ";" + sanitizeNode(dataArray[4][1]) + ";" + sanitizeNode(dataArray[4][-1]) + " ]\n"))
     isInDatabase(nodesList,dataArray[4])
     assignedClasses,classes = classifyIt(dataArray,metadatum,nodesList)
-    youdenJ = countYouden(assignedClasses,classes)
-    interpretIt(youdenJ)
-    return assignedClasses,youdenJ
+    numberClass = len(classes)
+    #len(dataArray[0])?
+    youdenJ = countYouden(assignedClasses,classes,len(dataArray[0]))
+    interpretIt(number-youdenJ)
+    return assignedClasses,(number-youdenJ)
 
 def randomSubSamplingAct(dataArray):
     print dataArray[1]
@@ -212,18 +214,21 @@ def randomSubSamplingAct(dataArray):
     bestClassification = []
     bestClassesList = []
     #Worse value for this coefficient
-    currBestYouden = -1
+    currBestYouden = inf
     nodesNumber = dataArray[3]
     while s:
         #Randomly draw n distinct nodes among the nodes in the taxonomic tree
         nodesList = randomChoice(dataArray[4],n)
         assignedClasses,classes = classifyIt(dataArray,metadatum,nodesList)
-        youdenJ = countYouden(assignedClasses,classes)
-        if max(youdenJ,currBestYouden) == youdenJ:
+        numberClass = len(classes)
+        #len(dataArray[0])?
+        youdenJ = countYouden(assignedClasses,classes,len(dataArray[0]))
+        res = numberClass - youdenJ
+        if min(res,currBestYouden) == res:
             bestClassification = []
             for i in nodesList:
                 bestClassification.append(i)
-            currBestYouden = youdenJ
+            currBestYouden = res
             bestClassesList = []
             for i in assignedClasses:
                 bestClassesList.append(i)

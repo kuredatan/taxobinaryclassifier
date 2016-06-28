@@ -23,11 +23,11 @@ def computeClasses(dataArray,metadatum):
         raise ValueError
     return classes
 
- #Training step #1: selects a random subset of the set of features vectors (samples)
- #knuth=True uses Knuth's algorithm S, knuth=False uses Algorithm R
+#Training step #1: selects a random subset of the set of features vectors (samples)
+#knuth=True uses Knuth's algorithm S, knuth=False uses Algorithm R
 def selectTrainingSample(dataArray,n,knuth=False):
     trainSubset = randomChoice(dataArray[7],n,knuth)
-    return trainSubset
+    return trainSubset,unchosen
 
 #@featureVector is a pair (sample name, list of (metadatum,value) pairs)
 def giveValueMetadatum(featureVector,metadatum):
@@ -63,10 +63,6 @@ def getNumberValueSet(valueSet,value):
 #compute the Youden's J coefficient
 #returns @assignedClasses that is the partial partition of the set of samples restricted to the samples in @trainSubset
 def assignClass(trainSubset,classes):
-    #Since it is a binary classifier
-    if not (len(classes) == 2):
-        print "\n/!\ ERROR: classes length error: length",len(classes),"."
-        raise ValueError
     n1 = len(classes[0])
     n2 = len(classes[1])
     assignedClasses = [[],[]]
@@ -126,10 +122,10 @@ def getPlaceInNodesList(node,nodesList,n):
 #@n = len(@nodesList)
 #@m = len(@class1)
 def computeExpectSTDev(dataArray,class1,nodesList,n,m):
-    #@valuesClass contains (expectation,standard deviation) pairs for each node in @nodesList
+    #@valuesClass contains (node,expectation,standard deviation) tuples
     valuesClass = []
     #@nodesPresence[i][j] = 1 if @nodesList[i] matches a read in @class1[j], otherwise 0
-    nodesPresence = [[0]*m]*n
+    nodesPresence = np.zeros((n,m))
     for i in range(m):
         sampleIDNode = convertFeaturesIntoMatching(dataArray[7],dataArray[8],class1[i])
         nodesListMatch = getListFromMatchingNodes(dataArray[8],sampleIDNode)
@@ -143,22 +139,23 @@ def computeExpectSTDev(dataArray,class1,nodesList,n,m):
                 nodesPresence[index][i] = 1
     for i in range(n):
         expectation,stdev = expectSTDevList(nodesPresence[i])
-        valuesClass.append((expectation,stdev))
+        valuesClass.append((nodesList[i],expectation,stdev))
     return valuesClass
 
 #Returns @classes, which is the partition of the whole set of samples according to the values of metadatum
 #and @assignedClasses the partial partition of the training subset of samples
 #and @valuesClasses is the list of lists of (expectation,standard deviation) pairs for each node considered
+#and @unchosen is the set of remaining samples to cluster
 def trainingPart(dataArray,metadatum,nodesList):
     n = len(nodesList)
     classes = computeClasses(dataArray,metadatum)
     #len(classes): enough? 
-    trainSubset = selectTrainingSample(dataArray,len(classes))
+    trainSubset,unchosen = selectTrainingSample(dataArray,len(classes))
     assignedClasses = assignClass(dataArray,trainSubset,classes)
     #len(@assignedClasses) == 2 (see @assignClass)
     m1 = len(assignedClasses[0])
     m2 = len(assignedClasses[1])
     valuesClass1 = computeExpectSTDev(dataArray,assignedClasses[0],nodesList,n,m1)
     valuesClass2 = computeExpectSTDev(dataArray,assignedClasses[1],nodesList,n,m2)
-    return classes,assignedClasses,[valuesClass1,valuesClass2]
+    return classes,assignedClasses,[valuesClass1,valuesClass2],unchosen
     

@@ -73,7 +73,7 @@ def featuresCreate(sampleInfoList,infoList,filenames,fastaFileName):
     print "/!\ Parsing .fasta files"
     print "[ You may have to wait a few minutes... ]"
     try:
-        idSequences,phyloSequences = parseFasta(FastaFileName)
+        idSequences,phyloSequences = parseFasta(fastaFileName)
     except IOError:
         print "\nERROR: Maybe the filename you gave does not exist in \"meta\" folder\n"    
     #Link between file name and sample name?

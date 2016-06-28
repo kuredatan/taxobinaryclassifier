@@ -17,7 +17,7 @@ In the terminal:
 
 -----------------------------------------------------------------------------------------------------------------
 
-This program uses a Naive Bayes Classifier to infer correlations between metadata and the phylogenetic trees in samples. The classifier classifies a sample/patient in a classe corresponding to a certain list of values for a fixed metadatum. It is the binary version of TaxoClassifier.
+This program uses a Naive Bayes Classifier to infer correlations between metadata and the phylogenetic trees in samples. The classifier classifies a sample/patient in a classe corresponding to a certain list of values for a fixed metadatum. It is the "binary" version of TaxoClassifier, that is, we only consider one metadatum at a time, and classes will be as many as the number of values this metadatum can own.
 
 A sample/patient is defined with a features vector, containing the numeric values (boolean values are 0 and 1) corresponding to every metadatum collected, and a phylogenetic vector, containing for each node n of the phylogenetic tree a list of read numbers r such as n matches the read r. 
 
@@ -38,7 +38,7 @@ FN(c) are False Negative (the number of samples not assigned to C and matching C
 FP(c) are False Positive (the number of samples assigned to C and not matching C),
 and TN(c) are True Negative (the number of samples not assigned to C and not matching C).
 
-The best classification is the classification such as, for all class C, J(c) is the closest to 1 (that is, such as, if n = J(C) + J(not C), 2 - n is minimum and non-negative).
+The best classification is the classification such as, for all class C, J(c) is the closest to 1 (that is, such as, if n is the sum of J(C) for all s classes C, s - n is minimum and non-negative).
 
 -----------------------------------------------------------------------------------------------------------------
 

@@ -1,21 +1,41 @@
-from misc import truncate
+from __future__ import division
+from misc import truncate,mem
 
-def countYouden(classesList,metadataList):
-    ()
+#Compute the TP,TN,FN,FP rates (see README)
+#@n is the number of samples
+#Returns the sum of J(C) for all classes C (see README)
+def countYouden(classes,assignedClasses,n):
+    youdenCoeffList = []
+    classesCopy = []
+    for class1 in classes:
+        classesCopy.append(class1)
+    assignedClassesCopy = []
+    for class1 in assignedClasses:
+        assignedClassesCopy.append(class1)
+    while assignedClassesCopy and classesCopy:
+        #for all i, @assignedClassesCopy[i] correspond to the same value of metadatum than @classes[i]
+        class1,asClass1 = classesCopy.pop(),assignedClassesCopy.pop()
+        tp,fp,fn = 0,0,0
+        #TN = @n - FP - TP - FN
+        for sample in class1:
+            if mem(sample,asClass1):
+                tp += 1
+            else:
+                fn += 1
+        for sample in asClass1:
+            if not mem(sample,class1):
+                fp += 1
+        tn = n - tp - fp - fn
+        j = tp/(tp + fn) + tn/(tn + fp) - 1
+        if j < -1 or j > 1:
+            print "\n/!\ ERROR: Inconsistent value of Youden's J coefficient:",j,"."
+            raise ValueError
+        youdenCoeffList.append(j)
+    s = 0
+    for j in youdenCoeffList:
+        s += j
+    return s
+    
 
 def interpretIt(youdenJ):
-    if youdenJ > 1 or youdenJ < -1:
-        print "\n/!\ ERROR: Youden's index must be comprised between -1 and 1."
-        raise ValueError
-    elif youdenJ == 1:
-        print "Perfect correlation between the metadata selected and the phylogeny."
-    elif youdenJ < 1 and 0.5 < youdenJ:
-        print "1"
-    elif youdenJ <= 0.5 and 0 < youdenJ:
-        print "2"
-    elif youdenJ == 0:
-        print "Useless test."
-    elif youdenJ < 0 and -0.5 <= youdenJ:
-        print "3"
-    else:
-        print "4"
+    print youdenJ

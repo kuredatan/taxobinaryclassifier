@@ -1,19 +1,18 @@
-from multiDimList import accessMDL,initMDL,modifyMDL
-
 #Computes Bayes's theorem
 #Returns a list @postMeasures containing class probabilities for each class, and the array @hashInt such as @postMeasures[i] is the class probability of class @hashInt[i] (@hashInt[i] is the list such as accessMDL[@hashInt[i]] is the class associated)
-def bayesCalculus(featureVector,assignedClasses,valuesClasses,shape,nodesList,dataArray):
+def bayesCalculus(sample,valuesClasses,nodesList,dataArray):
     ()
 
-#Returns a (multi-dimensionnal list) MDL containing the list of features vector in this class
-def classifyIt(dataArray,metadataList,nodesList):
-    #@values classes is a list containing lists of (node,expectation,standard deviation) pairs (for each class)
-    #@assignedClasses is the current MDL of the classes
-    #@shape is a list containing the dimensions of @assignedClasses
-    valuesClasses,assignedClasses,shape = trainingPart(dataArray,metadataList,nodesList)
-    #@dataArray[7] = featuresVectorList
-    for featureVector in dataArray[7]:
-        postMeasures,hashInt = bayesCalculus(featureVector,assignedClasses,valuesClasses,shape,nodesList,dataArray)
+#Returns @assignedClasses (partition of the whole set of samples according to node population)
+#and @classes (partition of the whole set of samples according to the values of metadatum)
+def classifyIt(dataArray,metadatum,nodesList):
+    #@valuesClasses is a list containing lists of (node,expectation,standard deviation) pairs (for each class)
+    #@assignedClasses is the current partial partition of the set of samples
+    #@classes is the partition of the whole set of samples (to compute Youden's J coefficient)
+    #@unchosen is the set of samples remaining to be clustered
+    classes,assignedClasses,valuesClasses,unchosen = trainingPart(dataArray,metadatum,nodesList)
+    for sample in unchosen:
+        postMeasures,hashInt = bayesCalculus(sample,valuesClasses,nodesList,dataArray)
         maxIndex = 0
         maxProb = 0
         n = len(postMeasures)
