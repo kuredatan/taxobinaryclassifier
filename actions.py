@@ -4,10 +4,6 @@ import re
 import random as rand
 
 from writeOnFiles import writeFile
-from parsingMatrix import parseMatrix,importMatrix
-from parsingInfo import parseInfo
-from parsingTree import parseTree
-from taxoTree import TaxoTree,printTree
 from misc import getValueBacteriaBacteria,getValueBacteriaMetadata,mem,isInDatabase,getMaxMin,partitionSampleByMetadatumValue,sanitize,inf
 from classifier import classifyIt
 from youden import countYouden,interpretIt
@@ -15,7 +11,8 @@ from randomSampling import randomChoice
 
 from plottingValues import plotPearsonGraph,plotGraph,plotHist,plotPie
 
-#@dataArray = [samplesInfoList,infoList,paths,n,nodesList,taxoTree,sampleIDList,featuresVectorList,matchingNodes]
+#MODIFY actions classifier youden training
+#@dataArray = [samplesInfoList,infoList,nodesList,sampleIDList,featuresVectorList,matchingNodes]
 
 integer = re.compile("[0-9]+")
 
@@ -290,15 +287,6 @@ def creatingArray(dataArray,pearson=False):
         else:
             print "\nERROR: You need to answer 'graph' or 'pie', and not ",graphTypeInput
             raise ValueError            
-
-#____________________________________________________________________________
-
-def printTreeAct(dataArray):
-    answer = raw_input("Do you want to print sample hit lists? Y/N\n")
-    if not ((answer == "Y") or (answer == "N")):
-        print "\n/!\ ERROR: You need to answer 'Y' or 'N'."
-        raise ValueError
-    printTree(dataArray[7],(answer == "Y"))
 
 #____________________________________________________________________________
 

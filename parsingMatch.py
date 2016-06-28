@@ -31,4 +31,3 @@ def parseAllMatch(filenames):
     end = time()
     print "TIME:",(end-start)
     return allMatches
-    

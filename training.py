@@ -1,5 +1,4 @@
 #for training part in classification
-from normalization import expectSTDevList
 from misc import partitionSampleByMetadatumValue,mem
 from randomSampling import randomChoice
 import numpy as np
@@ -95,19 +94,19 @@ def assignClass(trainSubset,classes):
 #Training step #3: computes expectation and standard deviation for the different criteria over nodes for each class
 #@nodesList is the list of (name,rank) of considered nodes
 #@matchingNodes contains (sampleID,list of nodes (name,rank) matching a read in this sample) pairs
-def getListFromMatchingNodes(matchingNodes,sampleID):
-    i = 0
-    n = len(matchingNodes)
-    while i < n and not (matchingNodes[i][0] == sampleID):
-        if not (len(matchingNodes[i]) == 2):
-            print "\n/!\ ERROR: matchingNodes formatting incorrect: length:",len(matchingNodes[i]),"."
-            raise ValueError
-        i += 1
-    if (i == n):
-        print "\n/!\ ERROR: Sample",sampleID,"not in matchingNodes."
-        raise ValueError
-    else:
-        return matchingNodes[i]
+#def getListFromMatchingNodes(matchingNodes,sampleID):
+#    i = 0
+#    n = len(matchingNodes)
+#    while i < n and not (matchingNodes[i][0] == sampleID):
+#        if not (len(matchingNodes[i]) == 2):
+#            print "\n/!\ ERROR: matchingNodes formatting incorrect: length:",len(matchingNodes[i]),"."
+#            raise ValueError
+#        i += 1
+#    if (i == n):
+#        print "\n/!\ ERROR: Sample",sampleID,"not in matchingNodes."
+#        raise ValueError
+#    else:
+#        return matchingNodes[i]
 
 def getPlaceInNodesList(node,nodesList,n):
     i = 0
@@ -121,26 +120,26 @@ def getPlaceInNodesList(node,nodesList,n):
 
 #@n = len(@nodesList)
 #@m = len(@class1)
-def computeExpectSTDev(dataArray,class1,nodesList,n,m):
-    #@valuesClass contains (node,expectation,standard deviation) tuples
-    valuesClass = []
-    #@nodesPresence[i][j] = 1 if @nodesList[i] matches a read in @class1[j], otherwise 0
-    nodesPresence = np.zeros((n,m))
-    for i in range(m):
-        sampleIDNode = convertFeaturesIntoMatching(dataArray[7],dataArray[8],class1[i])
-        nodesListMatch = getListFromMatchingNodes(dataArray[8],sampleIDNode)
-        for node in nodesList:
-            if not (len(node) == 2):
-                print "\n/!\ ERROR: node error: length",len(node),"."
-                raise ValueError
-            elif mem(node,nodesListMatch):
-                index = getPlaceInNodesList(node,nodesList,n)
-                #see @getPlaceInNodesList: i < n 
-                nodesPresence[index][i] = 1
-    for i in range(n):
-        expectation,stdev = expectSTDevList(nodesPresence[i])
-        valuesClass.append((nodesList[i],expectation,stdev))
-    return valuesClass
+#def computeExpectSTDev(dataArray,class1,nodesList,n,m):
+#    #@valuesClass contains (node,expectation,standard deviation) tuples
+#    valuesClass = []
+#    #@nodesPresence[i][j] = 1 if @nodesList[i] matches a read in @class1[j], otherwise 0
+#    nodesPresence = np.zeros((n,m))
+#    for i in range(m):
+#        sampleIDNode = convertFeaturesIntoMatching(dataArray[7],dataArray[8],class1[i])
+#        nodesListMatch = getListFromMatchingNodes(dataArray[8],sampleIDNode)
+#        for node in nodesList:
+#            if not (len(node) == 2):
+#                print "\n/!\ ERROR: node error: length",len(node),"."
+#                raise ValueError
+#            elif mem(node,nodesListMatch):
+#                index = getPlaceInNodesList(node,nodesList,n)
+#                #see @getPlaceInNodesList: i < n 
+#                nodesPresence[index][i] = 1
+#    for i in range(n):
+#        expectation,stdev = expectSTDevList(nodesPresence[i])
+#        valuesClass.append((nodesList[i],expectation,stdev))
+#    return valuesClass
 
 #Returns @classes, which is the partition of the whole set of samples according to the values of metadatum
 #and @assignedClasses the partial partition of the training subset of samples
@@ -153,9 +152,9 @@ def trainingPart(dataArray,metadatum,nodesList):
     trainSubset,unchosen = selectTrainingSample(dataArray,len(classes))
     assignedClasses = assignClass(dataArray,trainSubset,classes)
     #len(@assignedClasses) == 2 (see @assignClass)
-    m1 = len(assignedClasses[0])
-    m2 = len(assignedClasses[1])
-    valuesClass1 = computeExpectSTDev(dataArray,assignedClasses[0],nodesList,n,m1)
-    valuesClass2 = computeExpectSTDev(dataArray,assignedClasses[1],nodesList,n,m2)
-    return classes,assignedClasses,[valuesClass1,valuesClass2],unchosen
+    #m1 = len(assignedClasses[0])
+    #m2 = len(assignedClasses[1])
+    #valuesClass1 = computeExpectSTDev(dataArray,assignedClasses[0],nodesList,n,m1)
+    #valuesClass2 = computeExpectSTDev(dataArray,assignedClasses[1],nodesList,n,m2)
+    return classes,assignedClasses,unchosen#[valuesClass1,valuesClass2]
     

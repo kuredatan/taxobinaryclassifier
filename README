@@ -73,21 +73,20 @@ Parses data table stored at /meta.
 **** parsingMatch.py ****
 Parses MATCH files stored at /meta/match.
 
-**** parsingTree.py ****
-Parses taxonomic tree stored at /meta.
-
 **** plottingValues.py ****
 Draws the graph of a set of values yArray depending on set of values xArray.
 
-**** taxoTree.py ****
-Implements a sligthly modified version of TaxoTree (compared to the one in TAXOTREE).
+**** randomSampling.py ****
+Chooses randomly a certain number of elements in a set.
 
 **** training.py ****
+Training part for the classifier.
 
 **** writeOnFiles ****
 Helps saving results in files.
 
 **** youden.py ****
+Computation of Youden's J statistic.
 
 
 

@@ -32,7 +32,7 @@ def getCorrespondingID(sequenceID,idSequences):
     return i
 
 def getNodeAssociated(sequenceID,idSequences,phyloSequences):
-    index = getCorrespondingID(sequenceED,idSequences)
+    index = getCorrespondingID(sequenceID,idSequences)
     if not (len(phyloSequences[index][-1]) == 2):
         print "\n/!\ ERROR: [BUG] [featuresVector/getNodeAssociated] Wrong node length:",len(phyloSequences[index][-1]),"."
         raise ValueError
@@ -44,9 +44,22 @@ def getNodeAssociated(sequenceID,idSequences,phyloSequences):
     name = idSequences[index][1]
     return (name,rank)
 
+#Returns @nodesList, the list of matched nodes (name,rank)
+#@idSequences is a list of (identifier,name of sequence)
+#@phyloSequences is a list of lists of (name,rank) such as @phyloSequences[i] is the phylogeny of @idSequences[i]
+def getNodesList(idSequences,phyloSequences):
+    nodesList = []
+    for identName in idSequences:
+        if not len(identName) == 2:
+            print "\n/!\ ERROR: Incorrect idSequences formatting."
+            raise ValueError
+        nodesList.append(getNodeAssociated(identName[0],idSequences,phyloSequences))
+    return nodesList
+
 #@allMatches is a list of (sample ID,list of sequences ID matching a read in this sample) pairs (see parsingMatch.py)
 #returns a list of (sample ID,list of nodes (name,rank) matching a read in this sample) pairs
-def getMatchingNodes(allMatches,idSequences,phyloSequences):
+#@nodesList is such as @nodesList[i] is the node associated to sequence idSequences[i] (see @getNodesList)
+def getMatchingNodes(allMatches,nodesList,idSequences):
     matchingNodes = []
     for pair in allMatches:
         if not len(pair) == 2:
@@ -56,7 +69,8 @@ def getMatchingNodes(allMatches,idSequences,phyloSequences):
         matchingSequences = pair[1]
         matchingThisSampleNodes = []
         for sequenceID in matchingSequences:
-            matchingThisSampleNodes.append(getNodeAssociated(sequenceID,idSequences,phyloSequences))
+            index = getCorrespondingID(sequenceID,idSequences)
+            matchingThisSampleNodes.append(nodesList[index])
         matchingNodes.append((sampleID,matchingThisSampleNodes))
     return matchingNodes
         
@@ -90,11 +104,12 @@ def featuresCreate(sampleInfoList,infoList,filenames,fastaFileName):
             metadataList.append((infoList[i],sample[i]))
         featuresVectorList.append((sample[0],metadataList))
     #--------------CONSTRUCTING @matchingNodes
-    matchingNodes = getMatchingNodes(allMatches,idSequences,phyloSequences)
-    return featuresVectorList,matchingNodes
+    nodesList = getNodesList(idSequences,phyloSequences)
+    matchingNodes = getMatchingNodes(allMatches,nodesList,idSequences)
+    return featuresVectorList,matchingNodes,nodesList
 
 def test():
     from parsingInfo import parseInfo
     sampleInfoList,infoList = parseInfo("Info")
-    featuresVectorList,matchingNodes = featuresCreate(sampleInfoList,infoList,["BC_M0_good","DC_M0_good"],"test")
+    featuresVectorList,matchingNodes,nodesList = featuresCreate(sampleInfoList,infoList,["test"],"test")
     return featuresVectorList[:3],matchingSequences[:3]
