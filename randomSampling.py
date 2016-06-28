@@ -7,16 +7,13 @@ from random import randint
 
 #When element is selected to be @reservoir[k], deletes it (if exists) from @unchosen
 #@m is the length of the total list, and also the length of @unchosen
-def swap(element,reservoir,k,unchosen,m):
-    j = 0
-    while j < m and not (unchosen[j] == element):
-        j += 1
+
+#Gets @unchosen set in linear time
+def swap(element,i,reservoir,k,unchosen,m):
     #Means @element is already in @reservoir
-    if (j == m):
-        reservoir[k] = element
-    else:
-        unchosen[j] = reservoir[k]
-        reservoir[k] = element
+    if (unchosen[i] == element):
+        unchosen[i] = reservoir[k]
+    reservoir[k] = element
     return reservoir,unchosen
 
 def cleanNone(unchosen):
@@ -30,14 +27,18 @@ def randomChoice(elementList,n,knuth=False):
         print "\n/!\ ERROR: Required set is bigger than set of available elements."
         raise ValueError
     reservoir = elementList[:n]
-    unchosen = [None]*n + elementList[n:]
+    unchosen = []
+    for i in range(n):
+        unchosen.append(None)
+    for i in range(m-n):
+        unchosen.append(elementList[i+n])
     for i in range(n,m):
         j = randint(0,i)
         if j < n:
             if knuth:
                 k = randint(0,n-1)
-                reservoir,unchosen = swap(elementList[i],reservoir,k,unchosen,m)
+                reservoir,unchosen = swap(elementList[i],i,reservoir,k,unchosen,m)
             else:
-                reservoir,unchosen = swap(elementList[i],reservoir,j,unchosen,m)
+                reservoir,unchosen = swap(elementList[i],i,reservoir,j,unchosen,m)
     unchosen = cleanNone(unchosen)    
     return reservoir,unchosen
