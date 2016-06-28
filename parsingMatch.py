@@ -1,4 +1,5 @@
 from misc import sanitize
+from time import time
 
 #Returns the pair (identifier of patient a.k.a. @filename,list of identifiers of sequences matching a read in this patient)
 def parseMatch(filename):
@@ -16,13 +17,18 @@ def parseMatch(filename):
         if len(lsClean) < 1:
             print "\n/!\ ERROR: MATCH parsing error:",len(lsClean),"."
             raise ValueError
+        print "read",lsClean[0]
         allSequences += lsClean[1:]
     return (filename,allSequences)
 
 #Returns the list @allMatches such as @allMatches[i] is a pair (identifier of patient,list of identifiers of sequences matching a read in this patient) 
 def parseAllMatch(filenames):
     allMatches = []
+    start = time()
     for filename in filenames:
+        print "filename",filename
         allMatches.append(parseMatch(filename))
+    end = time()
+    print "TIME:",(end-start)
     return allMatches
     

@@ -1,4 +1,5 @@
 from misc import sanitize
+from time import time
 
 import re
 
@@ -32,6 +33,7 @@ def recomposeNameList(nameList):
 #Returns the list of pairs (identifiers of sequence,name of sequence) @idSequences in the file
 #and the array @phyloSequences such as @phyloSequences[i] is the phylogeny of @idSequences[i]
 def parseFasta(filename):
+    start = time()
     idSequences = []
     phyloSequences = []
     file_fasta = open("meta/" + filename + ".fasta","r")
@@ -47,6 +49,7 @@ def parseFasta(filename):
         #deletes > part
         lsDirty = lines[k][1:].split(" ")
         identifier = sanitize(lsDirty[0])
+        print "id processed",identifier
         #from name...
         lsDirty = lsDirty[2:]
         name = ""
@@ -65,4 +68,6 @@ def parseFasta(filename):
         idSequences.append((identifier,name))
         phyloSequences.append(currPhylogeny)
         k += 2
+    end = time()
+    print "TIME:",(end-start)
     return idSequences,phyloSequences

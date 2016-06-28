@@ -96,5 +96,5 @@ def featuresCreate(sampleInfoList,infoList,filenames,fastaFileName):
 def test():
     from parsingInfo import parseInfo
     sampleInfoList,infoList = parseInfo("Info")
-    featuresVectorList,matchingNodes = featuresCreate(sampleInfoList,infoList)
+    featuresVectorList,matchingNodes = featuresCreate(sampleInfoList,infoList,["BC_M0_good","DC_M0_good"],"test")
     return featuresVectorList[:3],matchingSequences[:3]
