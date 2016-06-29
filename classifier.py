@@ -13,7 +13,7 @@ def bayesCalculus(sample,nodesList,dataArray,numberClass,numberNode):
     nodesPresence = [0]*numberNode
     #Equiprobability (could also be computed using the training subset, but we should have dealt with the zero probabilities)
     probBeingInClass = 1/numberClass
-    probHavingNode = 1/numberNode
+    probHavingNode = 1/2
     i = 0
     #@dataArray[5] = matchingNodes
     n = len(dataArray[5])
@@ -29,7 +29,7 @@ def bayesCalculus(sample,nodesList,dataArray,numberClass,numberNode):
         nodList = matchingNodes[i][1]
         for node in nodList:
             nodesPresence[i] = int(mem(nod,nodesList))
-
+            
         
     normCt = probBeingInClass* + probBeingInClass*
     return postMeasures
@@ -37,7 +37,6 @@ def bayesCalculus(sample,nodesList,dataArray,numberClass,numberNode):
 #Returns @assignedClasses (partition of the whole set of samples according to node population)
 #and @classes (partition of the whole set of samples according to the values of metadatum)
 def classifyIt(dataArray,metadatum,nodesList):
-    #@valuesClasses is a list containing lists of (node,expectation,standard deviation) pairs (for each class)
     #@assignedClasses is the current partial partition of the set of samples
     #@classes is the partition of the whole set of samples (to compute Youden's J coefficient)
     #@unchosen is the set of samples remaining to be clustered
