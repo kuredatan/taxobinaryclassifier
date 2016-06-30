@@ -4,14 +4,13 @@ import re
 import random as rand
 
 from writeOnFiles import writeFile
-from misc import getValueBacteriaBacteria,getValueBacteriaMetadata,mem,isInDatabase,getMaxMin,partitionSampleByMetadatumValue,sanitize,inf
+from misc import isInDatabase,getMaxMin,sanitize,inf
 from classifier import classifyIt
 from youden import countYouden,interpretIt
 from randomSampling import randomChoice
 
-from plottingValues import plotPearsonGraph,plotGraph,plotHist,plotPie
+from plottingValues import plotPie
 
-#MODIFY actions classifier youden training
 #@dataArray = [samplesInfoList,infoList,nodesList,sampleIDList,featuresVectorList,matchingNodes]
 
 integer = re.compile("[0-9]+")
@@ -291,6 +290,7 @@ def creatingArray(dataArray,pearson=False):
 #____________________________________________________________________________
 
 #MODIFY CREATING ARRAY
+#Can get a pie of the assigned classes on values of a metadatum given a set of nodes
 def plottingAct(dataArray):
     creatingArrayOutput = creatingArray(dataArray)
     if creatingArrayOutput[0] == "graph":

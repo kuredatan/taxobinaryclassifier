@@ -110,8 +110,9 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
     numberSamples = len(trainSubset)
     #matchingNodes = @dataArray[8] is a list of (name of sample,nodes matching in sample) pairs
     n = len(dataArray[8])
-    #@nodesPresence is a list such as @nodesPresence[i][j] = 1 if node nodesList[i] matches in sample trainSubset[j]
-    nodesPresence = [[0]*numberSamples]*numberNodes
+    #@nodesPresence is a list such as @nodesPresence[i][j] = 1 if node nodesList[i] matches in sample matchingNodes[j][0]
+    #@dataArray[8] = @matchingNodes
+    nodesPresence = [[0]*len(dataArray[8])]*numberNodes
     #@nodesPositive is a list such as @nodesPositive[i] is the number of samples in the training subset containing node @nodesList[i]
     nodesPositive = [0]*numberNodes
     for sample in trainSubset:
