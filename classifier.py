@@ -1,6 +1,7 @@
 from __future__ import division
 
 from misc import mem
+from training import trainingPart
 
 #@dataArray = [samplesInfoList,infoList,nodesList,sampleIDList,featuresVectorList,matchingNodes]
 
@@ -20,7 +21,7 @@ def probabilityKnowingClass(nodesList,assignedClasses,dataArray,numberClass,numb
             for sample in class1:
                 indexSample = 0
                 #@dataArray[8] = @matchingNodes
-                while indexSample < numberMatching and not (sample == dataArray[8][indexSample][0]):
+                while indexSample < numberMatching and not (sample == dataArray[5][indexSample][0]):
                     indexSample += 1
                 if indexSample == numberMatching:
                     print "\n/!\ ERROR: This sample",sample,"is not in matchingNodes."
@@ -33,7 +34,7 @@ def probabilityKnowingClass(nodesList,assignedClasses,dataArray,numberClass,numb
         nod += 1
     return probKnowingClass
 
-def bayesCalculus(sample,nodesList,dataArray,assignedClasses,numberClass,numberNodes,numberMatching,nodesList,probList,nodesPresence):
+def bayesCalculus(sample,nodesList,dataArray,assignedClasses,numberClass,numberNodes,numberMatching,probList,nodesPresence):
     postMeasures = [0]*numberClass
     #Equiprobability (could also be computed using the training subset, but we should have dealt with the zero probabilities)
     #with the bayesian average used for probabilities of having a node, but it would be as irrelevant, because interaction between
@@ -67,7 +68,7 @@ def classifyIt(dataArray,metadatum,nodesList):
     numberClass = len(classes)
     numberNodes = len(nodesList)
     numberMatching = len(dataArray[8])
-    if not (len(numberClass == len(assignedClasses)):
+    if not (len(numberClass) == len(assignedClasses)):
         print "\n/!\ ERROR: Length error: classes:",numberClass,"assignedClasses",len(assignedClasses),"."
         raise ValueError
     for sample in unchosen:
@@ -82,4 +83,4 @@ def classifyIt(dataArray,metadatum,nodesList):
                 maxIndex = i
         #Assigning this sample to the class number @maxIndex
         assignedClasses[maxIndex] = assignedClasses[maxIndex].append(sample)
-            return assignedClasses,classes,valueSet
+    return assignedClasses,classes,valueSet

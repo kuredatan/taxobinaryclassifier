@@ -49,7 +49,6 @@ def parseFasta(filename):
         #deletes > part
         lsDirty = lines[k][1:].split(" ")
         identifier = sanitize(lsDirty[0])
-        print "id processed",identifier
         #from name...
         lsDirty = lsDirty[2:]
         name = ""
@@ -69,5 +68,5 @@ def parseFasta(filename):
         phyloSequences.append(currPhylogeny)
         k += 2
     end = time()
-    print "TIME:",(end-start)
+    print "TIME .fasta:",(end-start)
     return idSequences,phyloSequences

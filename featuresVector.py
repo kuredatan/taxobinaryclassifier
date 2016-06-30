@@ -1,5 +1,8 @@
+import sys as s
+
 from parsingMatch import parseAllMatch
 from parsingFasta import parseFasta
+from misc import mem
 
 #Creates for each patient the corresponding features vector and matching nodes, that is:
 #@featuresVectorList is the list of @featuresVector such as @featuresVector is a pair
@@ -16,23 +19,30 @@ def getNextRank(rank,ranks=["R","K","P","C","O","F","G","S"]):
         print "\n/!\ ERROR: Wrong phylogeny (1). Please change the ranks array in featuresVector.py."
         raise ValueError
     elif (i == n-1):
-        print "\n/!\ ERROR: Wrong phylogeny (2). Please change the ranks array in featuresVector.py."
-        raise ValueError
+        #print "\n/!\ ERROR: Wrong phylogeny (2). Please change the ranks array in featuresVector.py."
+        #raise ValueError
+        return ranks[i]
     else:
         return ranks[i+1]
 
+#@idSequences is a list of (identifier,name of node associated to sequence) pairs
 def getCorrespondingID(sequenceID,idSequences):
     i = 0
     n = len(idSequences)
-    while i < n and not idSequences[i] == sequenceID:
+    while i < n and not idSequences[i][0] == sequenceID:
         i += 1
     if (i == n):
-        print "\n/!\ ERROR: sequence not in idSequences."
-        raise ValueError
+        #ignore these ID (for tests only)
+        print "\n/!\ ERROR: sequenceID ",sequenceID," not in idSequences."
+        #raise ValueError
+        return -1
     return i
 
 def getNodeAssociated(sequenceID,idSequences,phyloSequences):
     index = getCorrespondingID(sequenceID,idSequences)
+    if index == -1:
+        #ignore these IDs
+        return 0
     if not (len(phyloSequences[index][-1]) == 2):
         print "\n/!\ ERROR: [BUG] [featuresVector/getNodeAssociated] Wrong node length:",len(phyloSequences[index][-1]),"."
         raise ValueError
@@ -53,7 +63,12 @@ def getNodesList(idSequences,phyloSequences):
         if not len(identName) == 2:
             print "\n/!\ ERROR: Incorrect idSequences formatting."
             raise ValueError
-        nodesList.append(getNodeAssociated(identName[0],idSequences,phyloSequences))
+        node = getNodeAssociated(identName[0],idSequences,phyloSequences)
+        if not node:
+            #Ignore these samples
+            continue
+        else:
+            nodesList.append(node)
     return nodesList
 
 #@allMatches is a list of (sample ID,list of sequences ID matching a read in this sample) pairs (see parsingMatch.py)
@@ -80,21 +95,18 @@ def getMatchingNodes(allMatches,nodesList,idSequences):
 def featuresCreate(sampleInfoList,infoList,filenames,fastaFileName):
     print "/!\ Parsing .match files"
     print "[ You may have to wait a few minutes... ]"
-    try:
-        allMatches = parseAllMatch(filenames)
-    except IOError:
-        print "\nERROR: Maybe the filename you gave does not exist in \"meta/matches\" folder\n"
+    allMatches = parseAllMatch(filenames)
     print "/!\ Parsing .fasta files"
     print "[ You may have to wait a few minutes... ]"
     try:
         idSequences,phyloSequences = parseFasta(fastaFileName)
     except IOError:
-        print "\nERROR: Maybe the filename you gave does not exist in \"meta\" folder\n"    
+        print "\nERROR: Maybe the filename",fastaFileName,".fasta does not exist in \"meta\" folder\n"
+        s.exit(0)
     #Link between file name and sample name?
     #--------------CONSTRUCTING @featuresVectorList
     featuresVectorList = []
     for sample in sampleInfoList:
-        print sample[0]
         n = len(sample)
         if n < 1:
             print "\n/!\ ERROR: Sample info incorrect."

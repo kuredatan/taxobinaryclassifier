@@ -1,3 +1,5 @@
+import sys as s
+
 from parsingInfo import parseInfo
 from actions import userNodeSelectionAct,randomSubSamplingAct,parseList
 from featuresVector import featuresCreate
@@ -8,7 +10,7 @@ def main():
     if (iMatrix == ""):
         iMatrix = "Info"
     filenames = parseList(raw_input("Write down the MATCH file names in the folder \"meta/match\" [ without the extension .match ] [e.g. BC_M0;GC_M0 ] \n"))
-    if (filenames == ""):
+    if (filenames[0] == ""):
         filenames = ["BC_M0_good","DC_M0_good","GC_M0_good","TR_M0_good","BC_M3_good","DC_M3_good","GC_M3_good","TR_M3_good","BJ_M0_good","EY_M0_good","GM_M0_good","BJ_M3_good","EY_M3_good","GM_M3_good"]
     fastaFileName = raw_input("Write down the MATCH file names in the folder \"meta/match\" [ without the extension .fasta ]\n")
     if (fastaFileName == ""):
@@ -18,15 +20,16 @@ def main():
         samplesInfoList,infoList = parseInfo(iMatrix)
         sampleIDList = getSampleIDList(samplesInfoList)
     except IOError:
-        print "\nERROR: Maybe the filename you gave does not exist in \"meta\" folder.\n"
-    print "..."
-    try:
-        samplesOccList,speciesList = parseMatrix(oMatrix)
-    except IOError:
-        print "\nERROR: Maybe the filename you gave does not exist in \"meta\" folder.\n"
+        print "\nERROR: Maybe the filename",iMatrix,".csv does not exist in \"meta\" folder.\n"
+        s.exit(0)
     print "-- End of parsing\n"
     print "/!\ Constructing the features vectors..."
-    featuresVectorList,matchingNodes,nodesList = featuresCreate(sampleInfoList,infoList,filenames,fastaFileName)
+    try:
+        featuresVectorList,matchingNodes,nodesList = featuresCreate(samplesInfoList,infoList,filenames,fastaFileName)
+    except ValueError:
+        print "/!\ ERROR: Please look at the line above."
+        print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"
+        s.exit(0)
     print "-- End of construction\n"
     dataArray = [samplesInfoList,infoList,nodesList,sampleIDList,featuresVectorList,matchingNodes]
     answer = ""
@@ -49,5 +52,5 @@ def main():
                 raise ValueError
         except ValueError:
             print "/!\ ERROR: Please look at the line above."
-C            print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"
+            print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"
     #return dataArray    

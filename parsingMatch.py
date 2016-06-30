@@ -1,5 +1,7 @@
-from misc import sanitize
 from time import time
+import sys as s
+
+from misc import sanitize
 
 #Returns the pair (identifier of patient a.k.a. @filename,list of identifiers of sequences matching a read in this patient)
 def parseMatch(filename):
@@ -17,7 +19,6 @@ def parseMatch(filename):
         if len(lsClean) < 1:
             print "\n/!\ ERROR: MATCH parsing error:",len(lsClean),"."
             raise ValueError
-        print "read",lsClean[0]
         allSequences += lsClean[1:]
     return (filename,allSequences)
 
@@ -26,8 +27,12 @@ def parseAllMatch(filenames):
     allMatches = []
     start = time()
     for filename in filenames:
-        print "filename",filename
-        allMatches.append(parseMatch(filename))
+        try:
+            if filename:
+                allMatches.append(parseMatch(filename))
+        except IOError:
+            print "\nERROR: Maybe the filename",filename,".match does not exist in \"meta/matches\" folder\n"
+            s.exit(0)
     end = time()
-    print "TIME:",(end-start)
+    print "TIME .match:",(end-start)
     return allMatches

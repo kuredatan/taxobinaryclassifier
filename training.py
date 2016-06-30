@@ -29,7 +29,7 @@ def computeClasses(dataArray,metadatum):
 #knuth=True uses Knuth's algorithm S, knuth=False uses Algorithm R
 def selectTrainingSample(dataArray,n,knuth=False):
     #@dataArray[3] = sampleIDList, that matches samples in featuresVectorList
-    trainSubset = randomChoice(dataArray[3],n,knuth)
+    trainSubset,unchosen = randomChoice(dataArray[3],n,knuth)
     return trainSubset,unchosen
 
 #______________________________________________________________________________________________________
@@ -79,17 +79,17 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
     numberNodesInTrainSubset = 0
     numberNodes = len(nodesList)
     numberSamples = len(trainSubset)
-    #matchingNodes = @dataArray[8] is a list of (name of sample,nodes matching in sample) pairs
-    n = len(dataArray[8])
+    #matchingNodes = @dataArray[5] is a list of (name of sample,nodes matching in sample) pairs
+    n = len(dataArray[5])
     #@nodesPresence is a list such as @nodesPresence[i][j] = 1 if node nodesList[i] matches in sample matchingNodes[j][0]
     #@dataArray[8] = @matchingNodes
-    nodesPresence = [[0]*len(dataArray[8])]*numberNodes
+    nodesPresence = [[0]*len(dataArray[5])]*numberNodes
     #@nodesPositive is a list such as @nodesPositive[i] is the number of samples in the training subset containing node @nodesList[i]
     nodesPositive = [0]*numberNodes
     for sample in trainSubset:
         j = 0
-        while i < n and not (convertFeaturesIntoMatching(dataArray[7],dataArray[8],sample) == dataArray[8][j][0]):
-            if not (len(dataArray[8][j]) == 2):
+        while j < n and not (convertFeaturesIntoMatching(dataArray[4],dataArray[5],sample) == dataArray[5][j][0]):
+            if not (len(dataArray[5][j]) == 2):
                 print "\n/!\ ERROR: Pair length error:",len(pair),"."
                 raise ValueError
             j += 1
@@ -97,7 +97,7 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
             print "\n/!\ ERROR: Sample",sample,"not in matchingNodes."
             raise ValueError
         else:
-            nodesSampleList = dataArray[8][j][1]
+            nodesSampleList = dataArray[5][j][1]
             i = 0
             for node in nodesList:
                 nodesPresence[i][j] = int(mem(node,nodesSampleList))
@@ -122,10 +122,5 @@ def trainingPart(dataArray,metadatum,nodesList):
     trainSubset,unchosen = selectTrainingSample(dataArray,len(classes))
     probList,nodesPresence = getPriorProbability(nodesList,trainSubset,dataArray)
     assignedClasses = assignClass(dataArray,trainSubset,classes)
-    #len(@assignedClasses) == 2 (see @assignClass)
-    #m1 = len(assignedClasses[0])
-    #m2 = len(assignedClasses[1])
-    #valuesClass1 = computeExpectSTDev(dataArray,assignedClasses[0],nodesList,n,m1)
-    #valuesClass2 = computeExpectSTDev(dataArray,assignedClasses[1],nodesList,n,m2)
-    return classes,valueSet,assignedClasses,unchosen,probList,nodesPresence #[valuesClass1,valuesClass2]
+    return classes,valueSet,assignedClasses,unchosen,probList,nodesPresence
     
