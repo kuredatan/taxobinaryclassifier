@@ -21,7 +21,7 @@ def computeClasses(dataArray,metadatum):
     if not valueSet:
         print "\n/!\ ERROR: metadatum",metadatum,"having abnormal values."
         raise ValueError
-    return classes
+    return classes,valueSet
 
 #______________________________________________________________________________________________________
 
@@ -33,35 +33,6 @@ def selectTrainingSample(dataArray,n,knuth=False):
     return trainSubset,unchosen
 
 #______________________________________________________________________________________________________
-
-#@featureVector is a pair (sample name, list of (metadatum,value) pairs)
-def giveValueMetadatum(featureVector,metadatum):
-    #if @featureVector is not a pair
-    if not (len(featureVector) == 2):
-        print "\n/!\ ERROR: Feature vector error: length",len(featureVector),"."
-        raise ValueError
-    #list of (metadatum,value) pairs
-    ls = featureVector[1]
-    for pair in ls:
-        if not (len(pair) == 2):
-            print "\n/!\ ERROR: Pair dimension error: length",len(pair),"."
-            raise ValueError
-        elif (pair[0] == metadatum):
-            return pair[1]
-    #If there is no pair corresponding to the metadatum in the list
-    print "\n/!\ ERROR: This metadatum",metadatum,"does not exist in the feature vector of sample",featureVector[0],"."
-    raise ValueError
-
-#To get the number of the class associated
-def getNumberValueSet(valueSet,value):
-    n = len(valueSet)
-    while i < n and not (valueSet[i] == value):
-        i += 1
-    if i == n:
-        print "\n/!\ ERROR: This value",value,"does not belong to the list:",valueSet,"."
-        raise ValueError
-    else:
-        return i
 
 #Training step #2: according to the values of metadatum, assigns a class to each sample of this subset
 #@classes (see @computeClasses) is the known partition of the whole set of samples ID, that will be useful to
@@ -140,63 +111,13 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
         probList.append((nodesPositive[i]*m + numberNodesInTrainSubset)/(nodesPositive[i] + numberSamples))
     return probList,nodesPresence
 
-#Training step #3: computes expectation and standard deviation for the different criteria over nodes for each class
-#@nodesList is the list of (name,rank) of considered nodes
-#@matchingNodes contains (sampleID,list of nodes (name,rank) matching a read in this sample) pairs
-#def getListFromMatchingNodes(matchingNodes,sampleID):
-#    i = 0
-#    n = len(matchingNodes)
-#    while i < n and not (matchingNodes[i][0] == sampleID):
-#        if not (len(matchingNodes[i]) == 2):
-#            print "\n/!\ ERROR: matchingNodes formatting incorrect: length:",len(matchingNodes[i]),"."
-#            raise ValueError
-#        i += 1
-#    if (i == n):
-#        print "\n/!\ ERROR: Sample",sampleID,"not in matchingNodes."
-#        raise ValueError
-#    else:
-#        return matchingNodes[i]
-
-def getPlaceInNodesList(node,nodesList,n):
-    i = 0
-    while i < n and not (node == nodesList[i]):
-        i += 1
-    if (i == n):
-        print "\n/!\ ERROR: Node",node,"is not in nodesList",nodesList,"."
-        raise ValueError
-    else:
-        return i
-
-#@n = len(@nodesList)
-#@m = len(@class1)
-#def computeExpectSTDev(dataArray,class1,nodesList,n,m):
-#    #@valuesClass contains (node,expectation,standard deviation) tuples
-#    valuesClass = []
-#    #@nodesPresence[i][j] = 1 if @nodesList[i] matches a read in @class1[j], otherwise 0
-#    nodesPresence = np.zeros((n,m))
-#    for i in range(m):
-#        sampleIDNode = convertFeaturesIntoMatching(dataArray[7],dataArray[8],class1[i])
-#        nodesListMatch = getListFromMatchingNodes(dataArray[8],sampleIDNode)
-#        for node in nodesList:
-#            if not (len(node) == 2):
-#                print "\n/!\ ERROR: node error: length",len(node),"."
-#                raise ValueError
-#            elif mem(node,nodesListMatch):
-#                index = getPlaceInNodesList(node,nodesList,n)
-#                #see @getPlaceInNodesList: i < n 
-#                nodesPresence[index][i] = 1
-#    for i in range(n):
-#        expectation,stdev = expectSTDevList(nodesPresence[i])
-#        valuesClass.append((nodesList[i],expectation,stdev))
-#    return valuesClass
-
 #Returns @classes, which is the partition of the whole set of samples according to the values of metadatum
 #and @assignedClasses the partial partition of the training subset of samples
 #and @valuesClasses is the list of lists of (expectation,standard deviation) pairs for each node considered
 #and @unchosen is the set of remaining samples to cluster
 def trainingPart(dataArray,metadatum,nodesList):
     n = len(nodesList)
-    classes = computeClasses(dataArray,metadatum)
+    classes,valueSet = computeClasses(dataArray,metadatum)
     #len(classes): enough? 
     trainSubset,unchosen = selectTrainingSample(dataArray,len(classes))
     probList,nodesPresence = getPriorProbability(nodesList,trainSubset,dataArray)
@@ -206,5 +127,5 @@ def trainingPart(dataArray,metadatum,nodesList):
     #m2 = len(assignedClasses[1])
     #valuesClass1 = computeExpectSTDev(dataArray,assignedClasses[0],nodesList,n,m1)
     #valuesClass2 = computeExpectSTDev(dataArray,assignedClasses[1],nodesList,n,m2)
-    return classes,assignedClasses,unchosen,probList,nodesPresence #[valuesClass1,valuesClass2]
+    return classes,valueSet,assignedClasses,unchosen,probList,nodesPresence #[valuesClass1,valuesClass2]
     

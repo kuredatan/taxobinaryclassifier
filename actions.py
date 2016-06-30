@@ -189,12 +189,29 @@ def userNodeSelectionAct(dataArray):
     isInDatabase([metadatum],dataArray[1])
     nodesList = parseListNode(raw_input("Choose the group of nodes you want to consider exclusively. [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[4][-3]) + ";" + sanitizeNode(dataArray[4][1]) + ";" + sanitizeNode(dataArray[4][-1]) + " ]\n"))
     isInDatabase(nodesList,dataArray[4])
-    assignedClasses,classes = classifyIt(dataArray,metadatum,nodesList)
+    assignedClasses,classes,valueSet = classifyIt(dataArray,metadatum,nodesList)
     numberClass = len(classes)
     #len(dataArray[0])?
     youdenJ = countYouden(assignedClasses,classes,len(dataArray[0]))
-    interpretIt(number-youdenJ)
-    return assignedClasses,(number-youdenJ)
+    interpretIt(youdenJ)
+    answer = raw_input("Do you want to plot the classes obtained as a pie? Y/N")
+    if answer == "Y":
+        labelsAs = [ metadatum + " = " + str(value) for value in valueSet ]
+        percentagesAs = [ len(class1) for class1 in assignedClasses ]
+        labels = [ metadatum + " = " + str(value) for value in valueSet ]
+        percentages = [ len(class1) for class1 in classes ]
+        plotPie(labelsAs,percentagesAs,"Assignments depending on " + str(nodesList) + " to class for metadatum " + metadatum)
+        plotPie(labels,percentages,"Real classes depending on " + str(nodesList) + " for metadatum " + metadatum)
+    elif not (answer == "N"):
+        print "\n Answer by Y or N!"
+    answer = raw_input("Do you want to save the results? Y/N")
+    if (answer == "Y"):
+        writeFile("Youden's J statistic for this classification is: " + str(youdenJ) + "\n","Assignments depending on " + str(nodesList) + " to classes for metadatum " + metadatum)
+    elif not (answer == "N"):
+        print "\n Answer by Y or N!"
+    return assignedClasses,youdenJ
+
+#________________________________________________________________________________________________________________________
 
 def randomSubSamplingAct(dataArray):
     print dataArray[1]
@@ -215,7 +232,7 @@ def randomSubSamplingAct(dataArray):
     while s:
         #Randomly draw n distinct nodes among the nodes in the taxonomic tree
         nodesList = randomChoice(dataArray[4],n)
-        assignedClasses,classes = classifyIt(dataArray,metadatum,nodesList)
+        assignedClasses,classes,valueSet = classifyIt(dataArray,metadatum,nodesList)
         numberClass = len(classes)
         #len(dataArray[0])?
         youdenJ = countYouden(assignedClasses,classes,len(dataArray[0]))
@@ -229,85 +246,17 @@ def randomSubSamplingAct(dataArray):
             for i in assignedClasses:
                 bestClassesList.append(i)
         s -= 1
-    interpretIt(currBestYouden)
-    return bestClassification,currBestYouden,bestClassesList
-
-#_____________________________________________________________________________
-
-
-#@dataArray = [samplesInfoList,infoList,paths,n,nodesList,taxoTree,sampleIDList,featuresVectorList,matchingSequences,idSequences,phyloSequences] /!\ CHANGED
-#Returns two arrays xArray and yArray, where yArray gives the value of a certain quantity depending on the values of xArray
-def creatingArray(dataArray,pearson=False):
-    #Available cases in Pearson function
-    if pearson:
-        typeInput = raw_input("Do you want to compute bacteria/bacteria or bacteria/metadatum? BB/BM [ Please read README for details. ]\n")
-        if (typeInput == "BB"):
-            valueInput1 = parseListNode(raw_input("Choose the first group of bacterias [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[4][-3]) + ";" + sanitizeNode(dataArray[4][1]) + ";" + sanitizeNode(dataArray[4][-1]) + " ]\n"))
-            isInDatabase(valueInput1,dataArray[6])
-            valueInput2 = parseListNode(raw_input("Choose the second group of bacterias [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[4][-3]) + ";" + sanitizeNode(dataArray[4][1]) + ";" + sanitizeNode(dataArray[4][-1]) + " ]\n"))
-            isInDatabase(valueInput2,dataArray[6])
-            xArray,yArray = getValueBacteriaBacteria(dataArray[2],dataArray[3],dataArray[8],valueInput1,valueInput2)
-            return xArray,yArray,typeInput,valueInput1,valueInput2
-        elif (typeInput == "BM"):
-            valueInput1 = parseListNode(raw_input("Choose the group of bacterias [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[6][-3]) + ";" + sanitizeNode(dataArray[6][1]) + ";" + sanitizeNode(dataArray[6][-1]) + " ]\n"))
-            isInDatabase(valueInput1,dataArray[6])
-            print dataArray[1]
-            valueInput2 = parseList(raw_input("Choose the metadatum among those printed above [ e.g. " + dataArray[1][0] + ";" + dataArray[1][-1] + " ]\n"))
-            isInDatabase(valueInput2,dataArray[1])
-            xArray,yArray = getValueBacteriaMetadata(dataArray[0],dataArray[1],valueInput1,dataArray[8],dataArray[2],dataArray[3],valueInput2)
-            return xArray,yArray,typeInput,valueInput1,valueInput2
-        else:
-            print "\nERROR: You need to answer 'BB' or 'BM', and not ",typeInput
-            raise ValueError
-    #Available cases for only plotting graphs
-    else:
-        graphTypeInput = raw_input("Do you want to plot a graph or a pie? graph/pie [Read README for details. Histograms will be available in later versions]\n")
-        if graphTypeInput == "graph":
-            typeInput = raw_input("Do you want to plot bacteria/bacteria or bacteria/metadatum? BB/BM [ Please read README for details. ]\n")
-            if (typeInput == "BB"):
-                valueInput1 = parseListNode(raw_input("Choose the first group of bacterias [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[6][-3]) + ";" + sanitizeNode(dataArray[6][1]) + ";" + sanitizeNode(dataArray[6][-1]) + " ]\n"))
-                isInDatabase(valueInput1,dataArray[6])
-                valueInput2 = parseListNode(raw_input("Choose the second group of bacterias [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[6][-3]) + ";" + sanitizeNode(dataArray[6][1]) + ";" + sanitizeNode(dataArray[6][-1]) + " ]\n"))
-                isInDatabase(valueInput2,dataArray[6])
-                return graphTypeInput,getValueBacteriaBacteria(dataArray[2],dataArray[3],dataArray[8],valueInput1,valueInput2),typeInput,valueInput1,valueInput2
-            elif (typeInput == "BM"):
-                valueInput1 = parseListNode(raw_input("Choose the group of bacterias [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[6][-3]) + ";" + sanitizeNode(dataArray[6][1]) + ";" + sanitizeNode(dataArray[6][-1]) + " ]\n"))
-                isInDatabase(valueInput1,dataArray[6])
-                print dataArray[1]
-                valueInput2 = parseList(raw_input("Choose the metadatum among those printed above [ e.g. " + dataArray[1][0] + ";" + dataArray[1][-1] + " ]\n"))
-                isInDatabase(valueInput2,dataArray[1])
-                return graphTypeInput,getValueBacteriaMetadata(dataArray[0],dataArray[1],valueInput1,dataArray[2],dataArray[3],valueInput2),typeInput,valueInput1,valueInput2
-            else:
-                print "\nERROR: You need to answer 'BB' or 'BM', and not ",typeInput
-                raise ValueError
-        elif graphTypeInput == "pie":
-                result,nodesGroup,sampleNameList,metadataList = percentageAct(dataArray)
-                return graphTypeInput,result,nodesGroup,sampleNameList,metadataList
-        else:
-            print "\nERROR: You need to answer 'graph' or 'pie', and not ",graphTypeInput
-            raise ValueError            
-
-#____________________________________________________________________________
-
-#MODIFY CREATING ARRAY
-#Can get a pie of the assigned classes on values of a metadatum given a set of nodes
-def plottingAct(dataArray):
-    creatingArrayOutput = creatingArray(dataArray)
-    if creatingArrayOutput[0] == "graph":
-            graphTypeInput,xArray,yArray,typeInput,valueInput1,valueInput2 = creatingArrayOutput
-            maxx,minix = getMaxMin(xArray)
-            maxy,miniy = getMaxMin(yArray)
-            if typeInput == "BB":
-                xLabel = "Group of bacteria 1"
-                yLabel = "Group of bacteria 2"
-            #typeInput == "BM"
-            else:
-                xLabel = "Group of bacteria"
-                yLabel = "Metadatum"
-            plotGraph(xArray,yArray,xLabel=xLabel,yLabel=yLabel,maxx=maxx,minx=minix,maxy=maxy,miny=miniy,title="Plotting of type " + typeInput + " with values " + str(valuesInput1[:3]) + "...  and " + str(valuesInput2[:3]) + "...")
-    elif creatingArrayOutput[0] == "pie":
-        graphTypeInput,result,nodesGroup,sampleNameList,metadataList = creatingArrayOutput
-        plotPie(sampleNameList,result,"Assignments to the group of bacterias: " + str(nodesGroup) + " depending on samples")
-    else:
-        print "\n/!\ ERROR: [BUG] [actions/plottingAct] Unknown type of graph."
-        raise ValueError
+    interpretIt(numberClass - currBestYouden)
+    if answer == "Y":
+        labelsAs = [ metadatum + " = " + str(value) for value in valueSet ]
+        percentagesAs = [ len(class1) for class1 in assignedClasses ]
+        labels = [ metadatum + " = " + str(value) for value in valueSet ]
+        percentages = [ len(class1) for class1 in classes ]
+        plotPie(labelsAs,percentagesAs,"Assignments depending on " + str(nodesList) + " to class for metadatum " + metadatum)
+        plotPie(labels,percentages,"Real classes depending on " + str(nodesList) + " for metadatum " + metadatum)
+    answer = raw_input("Do you want to save the results? Y/N")
+    if (answer == "Y"):
+        writeFile("Best Youden's J statistic for this classification is: " + str(numberClass - currBestYouden) + "\nand most relevant list of nodes for this metadatum is:" + str(bestClassification),"Assignments to classes for metadatum " + metadatum)
+    elif not (answer == "N"):
+        print "\n Answer by Y or N!"
+    return bestClassification,(numberClass - currBestYouden),bestClassesList

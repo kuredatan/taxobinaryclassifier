@@ -63,7 +63,7 @@ def classifyIt(dataArray,metadatum,nodesList):
     #@unchosen is the set of samples remaining to be clustered
     #@probList is a list such as @probList[i] is the prior probability of having node @nodesList[i] in a sample
     #@nodesPresence is a list such as @nodesPresence[i][j] = 1 if node nodesList[i] matches in sample matchingNodes[j][0]
-    classes,assignedClasses,unchosen,probList,nodesPresence = trainingPart(dataArray,metadatum,nodesList)
+    classes,valueSet,assignedClasses,unchosen,probList,nodesPresence = trainingPart(dataArray,metadatum,nodesList)
     numberClass = len(classes)
     numberNodes = len(nodesList)
     numberMatching = len(dataArray[8])
@@ -82,4 +82,4 @@ def classifyIt(dataArray,metadatum,nodesList):
                 maxIndex = i
         #Assigning this sample to the class number @maxIndex
         assignedClasses[maxIndex] = assignedClasses[maxIndex].append(sample)
-    return assignedClasses
+            return assignedClasses,classes,valueSet
