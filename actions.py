@@ -80,11 +80,10 @@ def userNodeSelectionAct(dataArray):
     interpretIt(youdenJ)
     answer = raw_input("Do you want to plot the classes obtained as a pie? Y/N")
     if answer == "Y":
-        labelsAs = [ metadatum + " = " + str(value) for value in valueSet ]
-        percentagesAs = [ len(class1) for class1 in assignedClasses ]
         labels = [ metadatum + " = " + str(value) for value in valueSet ]
+        percentagesAs = [ len(class1) for class1 in assignedClasses ]
         percentages = [ len(class1) for class1 in classes ]
-        plotPie(labelsAs,percentagesAs,"Assignments depending on " + str(nodesList) + " to class for metadatum " + metadatum)
+        plotPie(labels,percentagesAs,"Assignments depending on " + str(nodesList) + " to class for metadatum " + metadatum)
         plotPie(labels,percentages,"Real classes depending on " + str(nodesList) + " for metadatum " + metadatum)
     elif not (answer == "N"):
         print "\n Answer by Y or N!"
@@ -132,11 +131,10 @@ def randomSubSamplingAct(dataArray):
         s -= 1
     interpretIt(numberClass - currBestYouden)
     if answer == "Y":
-        labelsAs = [ metadatum + " = " + str(value) for value in valueSet ]
         percentagesAs = [ len(class1) for class1 in assignedClasses ]
         labels = [ metadatum + " = " + str(value) for value in valueSet ]
         percentages = [ len(class1) for class1 in classes ]
-        plotPie(labelsAs,percentagesAs,"Assignments depending on " + listNodes(nodesList) + " to class for metadatum " + metadatum)
+        plotPie(labels,percentagesAs,"Assignments depending on " + listNodes(nodesList) + " to class for metadatum " + metadatum)
         plotPie(labels,percentages,"Real classes depending on " + listNodes(nodesList) + " for metadatum " + metadatum)
     answer = raw_input("Do you want to save the results? Y/N")
     if (answer == "Y"):
