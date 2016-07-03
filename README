@@ -55,7 +55,7 @@ Details about the files:
 
 **** featuresVector.py ****
 
-**** /files
+**** /files ****
 Stores written files using writeOnFiles functions.
 
 **** main.py ****
