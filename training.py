@@ -115,11 +115,10 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
 #and @assignedClasses the partial partition of the training subset of samples
 #and @valuesClasses is the list of lists of (expectation,standard deviation) pairs for each node considered
 #and @unchosen is the set of remaining samples to cluster
-def trainingPart(dataArray,metadatum,nodesList):
+def trainingPart(dataArray,metadatum,nodesList,numberStartingSamples):
     n = len(nodesList)
     classes,valueSet = computeClasses(dataArray,metadatum)
-    #len(classes): enough? 
-    trainSubset,unchosen = selectTrainingSample(dataArray,len(classes))
+    trainSubset,unchosen = selectTrainingSample(dataArray,numberStartingSamples)
     probList,nodesPresence = getPriorProbability(nodesList,trainSubset,dataArray)
     assignedClasses = assignClass(dataArray,trainSubset,classes)
     return classes,valueSet,assignedClasses,unchosen,probList,nodesPresence

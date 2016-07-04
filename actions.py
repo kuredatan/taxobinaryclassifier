@@ -73,7 +73,11 @@ def userNodeSelectionAct(dataArray):
     isInDatabase([metadatum],dataArray[1])
     nodesList = parseListNode(raw_input("Choose the group of nodes you want to consider exclusively. [ Read the taxonomic tree to help you: e.g. " + sanitizeNode(dataArray[2][-3]) + ";" + sanitizeNode(dataArray[2][1]) + ";" + sanitizeNode(dataArray[2][-1]) + " ]\n"))
     isInDatabase(nodesList,dataArray[2])
-    assignedClasses,classes,valueSet = classifyIt(dataArray,metadatum,nodesList)
+    numberStartingSamples = int(sanitize(raw_input("Knowing there is/are " + str(dataArray[0]) + "sample(s), how many samples do you want to create the training set?")))
+    if not integer.match(numberStartingSamples):
+        print "\n/!\ ERROR: You should write down an integer."
+        raise ValueError
+    assignedClasses,classes,valueSet = classifyIt(dataArray,metadatum,nodesList,numberStartingSamples)
     numberClass = len(classes)
     #len(dataArray[0])?
     youdenJ = countYouden(assignedClasses,classes,len(dataArray[0]))
@@ -105,6 +109,10 @@ def randomSubSamplingAct(dataArray):
     if not integer.match(s) or not integer.match(n):
         print "\n/!\ ERROR: s and n must both be integers."
         raise ValueError
+    numberStartingSamples = int(sanitize(raw_input("Knowing there is/are " + str(dataArray[0]) + "samples, how many samples do you want to create the training set?")))
+    if not integer.match(numberStartingSamples):
+        print "\n/!\ ERROR: You should write down an integer."
+        raise ValueError
     s,n = int(s),int(n)
     #Here the set of classes is a list of two lists containing the samples in C and not C
     bestClassification = []
@@ -115,7 +123,7 @@ def randomSubSamplingAct(dataArray):
     while s:
         #Randomly draw n distinct nodes among the nodes in the taxonomic tree
         nodesList = randomChoice(dataArray[2],n)
-        assignedClasses,classes,valueSet = classifyIt(dataArray,metadatum,nodesList)
+        assignedClasses,classes,valueSet = classifyIt(dataArray,metadatum,nodesList,numberStartingSamples)
         numberClass = len(classes)
         #len(dataArray[0])?
         youdenJ = countYouden(assignedClasses,classes,len(dataArray[0]))
