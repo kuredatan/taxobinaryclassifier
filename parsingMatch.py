@@ -19,6 +19,7 @@ def parseMatch(filename):
         if len(lsClean) < 1:
             print "\n/!\ ERROR: MATCH parsing error:",len(lsClean),"."
             raise ValueError
+        print lsClean[0]
         allSequences += lsClean[1:]
     return (filename,allSequences)
 
@@ -26,13 +27,13 @@ def parseMatch(filename):
 def parseAllMatch(filenames):
     allMatches = []
     start = time()
-    for filename in filenames:
-        try:
+    try:
+        for filename in filenames:
             if filename:
                 allMatches.append(parseMatch(filename))
-        except IOError:
-            print "\nERROR: Maybe the filename",filename,".match does not exist in \"meta/matches\" folder\n"
-            s.exit(0)
+    except IOError:
+        print "\nERROR: Maybe one of these filenames",filenames,"does not exist in \"meta/matches\" folder\n"
+        s.exit(0)
     end = time()
     print "TIME .match:",(end-start)
     return allMatches
