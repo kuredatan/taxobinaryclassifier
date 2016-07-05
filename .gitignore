@@ -7,7 +7,9 @@ README~
 TODO.txt
 *.csv
 *.csv~
+*.tree
 *.tree~
+*.taxotree
 *.taxotree
 *.match
 *.match~
