@@ -9,9 +9,6 @@ def main():
     iMatrix = raw_input("Write down the CSV file name of the data matrix in the folder \"meta\" [ without the extension .csv ]\n")
     if (iMatrix == ""):
         iMatrix = "Info"
-    filenames = parseList(raw_input("Write down the MATCH file names in the folder \"meta/match\" [ without the extension .match ] [e.g. BC_M0;GC_M0 ] \n"))
-    if (filenames[0] == ""):
-        filenames = ["BC_M0_good","DC_M0_good","GC_M0_good","TR_M0_good","BC_M3_good","DC_M3_good","GC_M3_good","TR_M3_good","BJ_M0_good","EY_M0_good","GM_M0_good","BJ_M3_good","EY_M3_good","GM_M3_good"]
     fastaFileName = raw_input("Write down the MATCH file names in the folder \"meta/match\" [ without the extension .fasta ]\n")
     if (fastaFileName == ""):
         fastaFileName = "GREENGENES_gg16S_unaligned_10022015"
@@ -25,7 +22,8 @@ def main():
     print "-- End of parsing\n"
     print "/!\ Constructing the features vectors..."
     try:
-        featuresVectorList,matchingNodes,nodesList = featuresCreate(samplesInfoList,infoList,filenames,fastaFileName)
+        sampleIDListCopy = [sample for sample in sampleIDList]
+        featuresVectorList,matchingNodes,nodesList = featuresCreate(samplesInfoList,infoList,sampleIDListCopy,fastaFileName)
     except ValueError:
         print "/!\ ERROR: Please look at the line above."
         print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"

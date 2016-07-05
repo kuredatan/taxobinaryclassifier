@@ -99,3 +99,5 @@ Comments:
 *** Before starting TAXOBINARYCLASSIFIER ***
 - Create a folder entitled "files" to store your results.
 
+*** .match FILES ***
+- For a .match file for one sample, you should give this file the same name as the sample.

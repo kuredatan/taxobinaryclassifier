@@ -6,13 +6,6 @@ import numpy as np
 
 #@dataArray = [samplesInfoList,infoList,nodesList,sampleIDList,featuresVectorList,matchingNodes]
 
-#MISSING LINK BETWEEN SAMPLES IN @MATCHINGNODES AND @FEATURESVECTORLIST
-def convertFeaturesIntoMatching(featuresVectorList,matchingNodes,sampleID):
-    return sampleID
-
-def convertMatchingIntoFeatures(featuresVectorList,matchingNodes,sampleID):
-    return sampleID
-
 #Computes classes according to metadatum values
 def computeClasses(dataArray,metadatum):
     #Any value in @valueSet is an integer (see partitionSampleByMetadatumValue)
@@ -88,7 +81,7 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
     nodesPositive = [0]*numberNodes
     for sample in trainSubset:
         j = 0
-        while j < n and not (convertFeaturesIntoMatching(dataArray[4],dataArray[5],sample) == dataArray[5][j][0]):
+        while j < n and not (sample == dataArray[5][j][0]):
             if not (len(dataArray[5][j]) == 2):
                 print "\n/!\ ERROR: Pair length error:",len(pair),"."
                 raise ValueError
