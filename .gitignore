@@ -13,6 +13,8 @@ TODO.txt
 *.fasta
 *.fasta~
 *.taxotree~
+*.5
+*.5~
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
