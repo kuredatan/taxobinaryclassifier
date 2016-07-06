@@ -1,6 +1,7 @@
 from misc import sanitize
-from time import time
 
+from time import time
+import subprocess as sb
 import re
 
 integer = re.compile("[0-9]+")
@@ -11,8 +12,7 @@ def getBackBacteria(string):
     ls = string.split("__")
     n = len(ls)
     if not len(ls) == 2:
-        print "\n/!\ ERROR: FASTA file formatting error."
-        raise ValueError
+        return ""
     rank = sanitize(ls[0]).upper()
     #Phylogeny does not include the node itself
     if rank == "S":
@@ -40,20 +40,17 @@ def parseFasta(filename):
     start = time()
     idSequences = []
     phyloSequences = []
-    file_fasta = open("meta/" + filename + ".fasta","r")
-    lines = file_fasta.readlines()
-    file_fasta.close()
-    fileLength = len(lines)
-    k = 0
-    while k < fileLength:
+    sb.call("sed 'n;d' meta/" + filename + ".fasta > meta/newfile.fasta",shell=True)
+    fo = open("meta/newfile.fasta","r")
+    r = fo.readlines()
+    for line in r:
         #the FASTA file is such as:
         #first line: >identifier integer.integer name rank__name;rank__name; ...; otu_integer [phylogeny]
         #second line: sequence associated to this identifier
         currPhylogeny = []
         #deletes > part
-        lsDirty = lines[k][1:].split(" ")
+        lsDirty = line[1:].split(" ")
         identifier = sanitize(lsDirty[0])
-        print identifier
         #from name...
         lsDirty = lsDirty[2:]
         name = ""
@@ -74,7 +71,56 @@ def parseFasta(filename):
                 currPhylogeny.append(bact)
         idSequences.append((identifier,name))
         phyloSequences.append(currPhylogeny)
-        k += 2
+    fo.close()
+    sb.call("rm -f meta/newfile.fasta",shell=True)
+    end = time()
+    print "TIME .fasta:",(end-start)
+    return idSequences[-1],phyloSequences[-1]
+
+#Approximately as fast as parseFasta
+def parseFastaCharByChar(filename):
+    start = time()
+    idSequences = []
+    phyloSequences = []
+    sb.call("sed 'n;d' meta/" + filename + ".fasta > meta/newfile.fasta",shell=True)
+    fo = open("meta/newfile.fasta","r")
+    r = fo.readlines()
+    for line in r:
+        #the FASTA file is such as:
+        #LINE: >identifier integer.integer name rank__name;rank__name; ...; otu_integer [phylogeny]
+        #deletes > part
+        index = 1
+        currPhylogeny = []
+        indexEnd = 1
+        while not line[indexEnd] == " ":
+            indexEnd += 1
+        #Gets identifier
+        identifier = sanitize(line[index:indexEnd])
+        index = indexEnd+1
+        #jumping over "integer.integer" section
+        while line[index] and not line[index] == " ":
+            index += 1
+        index += 1
+        indexEnd = index + 0
+        while not line[indexEnd] == "_":
+            indexEnd += 1
+        indexEnd -= 3
+        #Gets name
+        name = sanitize(line[index:indexEnd+1])
+        index = indexEnd + 2
+        indexEnd = index + 0
+        while not line[index:index + 3] == "otu":
+            indexEnd = index + 0
+            while not line[indexEnd] == ";":
+                indexEnd += 1
+            bact = getBackBacteria(sanitize(line[index:indexEnd].split("(class)")[0]))
+            if bact:
+                currPhylogeny.append(bact)
+            index = indexEnd + 2
+        idSequences.append((identifier,name))
+        phyloSequences.append(currPhylogeny)
+    fo.close()
+    sb.call("rm -f meta/newfile.fasta",shell=True)
     end = time()
     print "TIME .fasta:",(end-start)
     return idSequences,phyloSequences
