@@ -95,7 +95,7 @@ def getMatchingNodes(allMatches,nodesList,idSequences):
 def featuresCreate(sampleInfoList,infoList,filenames,fastaFileName):
     print "/!\ Parsing .match files"
     print "[ You may have to wait a few minutes... ]"
-    allMatches = parseAllMatch(filenames)
+    allMatches = parseAllFact(filenames)
     print "/!\ Parsing .fasta files"
     print "[ You may have to wait a few minutes... ]"
     try:
