@@ -15,15 +15,14 @@ def main():
     print "/!\ Data getting parsed..."
     try:
         samplesInfoList,infoList = parseInfo(iMatrix)
-        sampleIDList = getSampleIDList(samplesInfoList)
+        sampleIDList = sorted(getSampleIDList(samplesInfoList),key=lambda x:x)
     except IOError:
         print "\nERROR: Maybe the filename",iMatrix,".csv does not exist in \"meta\" folder.\n"
         s.exit(0)
     print "-- End of parsing\n"
     print "/!\ Constructing the features vectors..."
     try:
-        sampleIDListCopy = [sample for sample in sampleIDList]
-        featuresVectorList,matchingNodes,nodesList = featuresCreate(samplesInfoList,infoList,sampleIDListCopy,fastaFileName)
+        featuresVectorList,matchingNodes,nodesList = featuresCreate(samplesInfoList,infoList,sampleIDList,fastaFileName)
     except ValueError:
         print "/!\ ERROR: Please look at the line above."
         print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"
