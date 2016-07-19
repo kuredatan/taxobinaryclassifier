@@ -1,5 +1,8 @@
 *.pyc
 /static
+*.tmp
+*.tmp~
+*.test~
 .DS_Store
 README~
 *.py~
