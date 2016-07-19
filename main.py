@@ -15,14 +15,22 @@ def main():
     print "/!\ Data getting parsed..."
     try:
         samplesInfoList,infoList = parseInfo(iMatrix)
-        sampleIDList = sorted(getSampleIDList(samplesInfoList),key=lambda x:x)
+        sampleIDList = getSampleIDList(samplesInfoList)
     except IOError:
         print "\nERROR: Maybe the filename",iMatrix,".csv does not exist in \"meta\" folder.\n"
         s.exit(0)
     print "-- End of parsing\n"
+    result = sb.check_output("ls ./meta/match/testfiles",shell=True)
+    if not result:
+        print "/!\ Pre-processing files for parsing..."
+        sb.call("ls > sampleidlist")
+        sampleidlist = sb.check_output("sed 's/.match//g' sampleidlist | sed 's/testfiles//g' | sed 's/sampleidlist//g' | sed '/^$/d'").split()
+        sb.call("rm -f sampleidlist")
+        process(sampleidlist)
+        print "/!\ Pre-processing done."
     print "/!\ Constructing the features vectors..."
     try:
-        featuresVectorList,matchingNodes,nodesList = featuresCreate(samplesInfoList,infoList,sampleIDList,fastaFileName)
+        featuresVectorList,matchingNodes,nodesList = featuresCreate(samplesInfoList,infoList,sampleIDlist,fastaFileName)
     except ValueError:
         print "/!\ ERROR: Please look at the line above."
         print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"
