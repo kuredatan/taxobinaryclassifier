@@ -1,46 +1,48 @@
 from time import time
 import sys as s
 import re
-
-from misc import sanitize
+import subprocess as sb
+import numpy as np
+import array
 
 integer = re.compile("[0-9]+")
 
 #Returns the pair (identifier of patient a.k.a. @filename,list of identifiers of sequences matching a read in this patient)
-def parseMatch(filename):
-    allSequences = []
-    fo = open("meta/match/" + filename + ".match","r")
-    r = fo.readlines()
-    numberRead = 0
-    #Each line corresponds to a read of this patient
-    for read in r:
-        print numberRead
-        lsDirty = read.split(" ")
-        lsClean = []
-        #Last string is "\n"
-        for string in lsDirty[1:-1]:
-            s = sanitize(string)
-            if integer.match(s):
-                lsClean.append(int(s))
-        if len(lsClean) > 0:
-            allSequences += lsClean
-        numberRead += 1
-    print allSequences[:100]
-    fo.close()
-    return (filename,allSequences)
-
-#Returns the list @allMatches such as @allMatches[i] is a pair (identifier of patient,list of identifiers of sequences matching a read in this patient) 
-def parseAllMatch(filenames):
-    allMatches = []
+def parseMatch(filename,i):
+    print filename
     start = time()
+    number = int(sb.check_output("head -n 1 ./meta/match/testfiles/file" + str(i) + ".test",shell=True))
+    result = np.zeros(number)
+    index = 0
+    with open("./meta/match/testfiles/file" + str(i) + ".test","r+b") as fo:
+        isFirst = True
+        for read in fo:
+            if isFirst:
+                isFirst = False
+            else:
+                iterator = re.finditer(integer,read)
+                for i in iterator:
+                    result[index] = int(i.group(0))
+                    index += 1
+    end = time()
+    print "TIME:",(end-start)
+    return (filename,result)
+
+#Returns dictionary @allMatches (key=sample ID a.k.a. @filename,value=list of identifiers of sequences matching a read in this sample) 
+def parseAllMatch(filenames):
+    allMatches = dict.fromkeys((None,None))
+    start = time()
+    filenames = sorted(filenames,key=lambda x:x)
+    i = 0
     for filename in filenames:
         try:
-            print filename
             if filename:
-                allMatches.append(parseMatch(filename))
+                sampleID,sequencesArray = parseMatch(filename,i)
+                allMatches.setdefault(sampleID,sequencesArray)
+                i += 1
         except IOError:
             print "\nERROR: Maybe the filename",filename,".match does not exist in \"meta/matches\" folder\n"
             s.exit(0)
     end = time()
     print "TIME .match:",(end-start)
-    #return allMatches
+    return allMatches
