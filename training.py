@@ -1,6 +1,6 @@
 from __future__ import division
 #for training part in classification
-from misc import partitionSampleByMetadatumValue,mem
+from misc import partitionSampleByMetadatumValue
 from randomSampling import randomChoice
 import numpy as np
 
@@ -92,7 +92,7 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
             nodesSampleList = dataArray[5][j][1]
             i = 0
             for node in nodesList:
-                nodesPresence[i][j] = int(mem(node,nodesSampleList))
+                nodesPresence[i][j] = int((node in nodesSampleList))
                 #if @nodesPresence[i][j] == 1
                 if nodesPresence[i][j]:
                     nodesPositive[i] += 1

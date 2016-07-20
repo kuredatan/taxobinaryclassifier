@@ -1,5 +1,5 @@
 from __future__ import division
-from misc import truncate,mem
+from misc import truncate
 
 #Compute the TP,TN,FN,FP rates (see README)
 #@n is the number of samples
@@ -18,12 +18,12 @@ def countYouden(classes,assignedClasses,n):
         tp,fp,fn = 0,0,0
         #TN = @n - FP - TP - FN
         for sample in class1:
-            if mem(sample,asClass1):
+            if (sample in asClass1):
                 tp += 1
             else:
                 fn += 1
         for sample in asClass1:
-            if not mem(sample,class1):
+            if not (sample in class1):
                 fp += 1
         tn = n - tp - fp - fn
         j = tp/(tp + fn) + tn/(tn + fp) - 1

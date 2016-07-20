@@ -23,15 +23,16 @@ def main():
     result = sb.check_output("ls ./meta/match/testfiles",shell=True)
     if not result:
         print "/!\ Pre-processing files for parsing..."
-        sb.call("ls > sampleidlist",shell=True)
-        sampleidlist = sb.check_output("sed 's/.match//g' sampleidlist | sed 's/testfiles//g' | sed 's/sampleidlist//g' | sed '/^$/d'",shell=True).split()
-        sb.call("rm -f sampleidlist",shell=True)
         process(sampleidlist)
         print "/!\ Pre-processing done."
+    sb.call("ls ./meta/match > sampleidlist",shell=True)
+    sampleidlist = sb.check_output("sed 's/.match//g' sampleidlist | sed 's/testfiles//g' | sed '/^$/d'",shell=True).split()
+    sb.call("rm -f sampleidlist",shell=True)
     print "/!\ Constructing the features vectors..."
+    sampleList = mergeList(sampleidlist,filenames)
     try:
-        featuresVectorList,matchingNodes,nodesList = featuresCreate(samplesInfoList,infoList,sampleIDlist,fastaFileName)
-    except ValueError:
+        matchingNodes,idSequences = featuresCreate(sampleList,fastaFileName)
+    except ValueError: 
         print "/!\ ERROR: Please look at the line above."
         print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"
         s.exit(0)

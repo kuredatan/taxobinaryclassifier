@@ -1,6 +1,5 @@
 from __future__ import division
 
-from misc import mem
 from training import trainingPart
 
 #@dataArray = [samplesInfoList,infoList,nodesList,sampleIDList,featuresVectorList,matchingNodes]

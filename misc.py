@@ -24,10 +24,10 @@ def truncate(number, digitNumber):
 def getSampleIDList(samplesList):
     sampleIDList = []
     for sample in samplesList:
-        if not mem(sample[0],sampleIDList):
+        if not (sample[0] in sampleIDList):
             sampleIDList.append(sample[0])
     #Sorts sample IDs in alphabetical order
-    return sorted(sampleIDList,key=lambda x:x)
+    return sorted(sampleIDList)
 
 def sanitize(name):
     ls = name.split(" ")
@@ -43,18 +43,10 @@ def sanitize(name):
     sName = sName + sLs[-1]
     return sName.split("\n")[0]
 
-#is member function
-def mem(x,ls):
-    n = len(ls)
-    for i in range(n):
-        if (x == ls[i]):
-            return True
-    return False
-
 #Checks if the elements in @parselist belong to @datalist else returns an error
 def isInDatabase(parseList,dataList):
     for pl in parseList:
-        if not mem(pl,dataList):
+        if not (pl in dataList):
             n = len(dataList)
             if not n:
                 print "\n/!\ ERROR: [BUG] [actions/isInDatabase] Empty list."
