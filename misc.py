@@ -8,6 +8,31 @@ inf = 100000000000000
 
 integer = re.compile("[0-9]+")
 
+
+#Merge the elements of both lists, deleting multiple occurrences
+def mergeList(list1,list2):
+    lst1 = sorted(list1)
+    lst2 = sorted(list1)
+    union = []
+    while lst1 and lst2:
+        x1 = lst1.pop()
+        x2 = lst2.pop()
+        if (x1 == x2):
+            union.append(x1)
+        elif (x1 < x2):
+            union.append(x2)
+            lst1.append(x1)
+        else:
+            union.append(x1)
+            lst2.append(x2)
+    #At the end of the loop, at least one of the two lists is empty
+    if lst1:
+        #We do not care of the order at the end of the merge
+        return union + lst1
+    else:
+        #@ls2 may be empty
+        return union + lst2
+
 def truncate(number, digitNumber):
     #Splitting the decimal and the integer parts of @number
     numberStringed = str(number).split('.')
@@ -18,16 +43,6 @@ def truncate(number, digitNumber):
         return int(integer)
     else:
         return float(integer + "." + decimal[:digitNumber])
-
-#Gets sample IDs from the data matrix
-#/!\ Some of the samples may be appear in the data matrix!
-def getSampleIDList(samplesList):
-    sampleIDList = []
-    for sample in samplesList:
-        if not (sample[0] in sampleIDList):
-            sampleIDList.append(sample[0])
-    #Sorts sample IDs in alphabetical order
-    return sorted(sampleIDList)
 
 def sanitize(name):
     ls = name.split(" ")

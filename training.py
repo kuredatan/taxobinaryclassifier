@@ -4,7 +4,7 @@ from misc import partitionSampleByMetadatumValue
 from randomSampling import randomChoice
 import numpy as np
 
-#@dataArray = [samplesInfoList,infoList,nodesList,sampleIDList,featuresVectorList,matchingNodes]
+#@dataArray = [samplesInfoList,infoList,sampleIDList,idSequences,matchingNodes]
 
 #Computes classes according to metadatum values
 def computeClasses(dataArray,metadatum):
@@ -22,7 +22,7 @@ def computeClasses(dataArray,metadatum):
 #knuth=True uses Knuth's algorithm S, knuth=False uses Algorithm R
 def selectTrainingSample(dataArray,n,knuth=False):
     #@dataArray[3] = sampleIDList, that matches samples in featuresVectorList
-    trainSubset,unchosen = randomChoice(dataArray[3],n,knuth)
+    trainSubset,unchosen = randomChoice(dataArray[3].values(),n,knuth)
     return trainSubset,unchosen
 
 #______________________________________________________________________________________________________
@@ -71,17 +71,17 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
     probList = []
     numberSstart = len(trainSubset)
     numberNodes = len(nodesList)
-    #matchingNodes = @dataArray[5] is a list of (name of sample,nodes matching in sample) pairs
-    n = len(dataArray[5])
+    #matchingNodes = @dataArray[4] is a dictionary of (key=name of sample,values=nodes matching in sample) pairs
+    n = len(dataArray[4])
     #@nodesPresence is a list such as @nodesPresence[i][j] = 1 if node nodesList[i] matches in sample matchingNodes[j][0]
-    #@dataArray[8] = @matchingNodes
-    nodesPresence = [[0]*len(dataArray[5])]*numberNodes
+    #@dataArray[4] = @matchingNodes
+    nodesPresence = [[0]*len(dataArray[4])]*numberNodes
     #@nodesPositive is a list such as @nodesPositive[i] is the number of samples in the training subset containing node @nodesList[i]
     nodesPositive = [0]*numberNodes
     for sample in trainSubset:
         j = 0
-        while j < n and not (sample == dataArray[5][j][0]):
-            if not (len(dataArray[5][j]) == 2):
+        while j < n and not (sample == dataArray[4][j][0]):
+            if not (len(dataArray[4][j]) == 2):
                 print "\n/!\ ERROR: Pair length error:",len(pair),"."
                 raise ValueError
             j += 1
@@ -89,7 +89,7 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
             print "\n/!\ ERROR: Sample",sample,"not in matchingNodes."
             raise ValueError
         else:
-            nodesSampleList = dataArray[5][j][1]
+            nodesSampleList = dataArray[4][j][1]
             i = 0
             for node in nodesList:
                 nodesPresence[i][j] = int((node in nodesSampleList))

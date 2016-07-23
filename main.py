@@ -5,7 +5,7 @@ from parsingInfo import parseInfo
 from actions import userNodeSelectionAct,randomSubSamplingAct,parseList
 from featuresVector import featuresCreate
 from preformat import process
-from misc import getSampleIDList
+from misc import mergeList
 
 def main():
     iMatrix = raw_input("Write down the CSV file name of the data matrix in the folder \"meta\" [ without the extension .csv ]\n")
@@ -17,7 +17,7 @@ def main():
     print "/!\ Data getting parsed..."
     try:
         samplesInfoList,infoList = parseInfo(iMatrix)
-        sampleIDList = getSampleIDList(samplesInfoList)
+        filenames = [sample[0] for sample in samplesInfoList]
     except IOError:
         print "\nERROR: Maybe the filename",iMatrix,".csv does not exist in \"meta\" folder.\n"
         s.exit(0)
@@ -33,13 +33,13 @@ def main():
     print "/!\ Constructing the features vectors..."
     sampleList = mergeList(sampleidlist,filenames)
     try:
-        matchingNodes,idSequences = featuresCreate(sampleList,fastaFileName)
+        matchingNodes,idSequences,_,_ = featuresCreate(sampleList,fastaFileName)
     except ValueError: 
         print "/!\ ERROR: Please look at the line above."
         print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"
         s.exit(0)
     print "-- End of construction\n"
-    dataArray = [samplesInfoList,infoList,nodesList,sampleList,featuresVectorList,matchingNodes]
+    dataArray = [samplesInfoList,infoList,sampleList,idSequences,matchingNodes]
     answer = ""
     while not ((answer == "exit") or (answer == "exit()") or (answer == "quit")):
         try:
@@ -61,4 +61,3 @@ def main():
         except ValueError:
             print "/!\ ERROR: Please look at the line above."
             print "/!\ ERROR: If the line above is blank, it may be an uncatched ValueError.\n"
-    #return dataArray    

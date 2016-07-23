@@ -2,7 +2,7 @@ from __future__ import division
 
 from training import trainingPart
 
-#@dataArray = [samplesInfoList,infoList,nodesList,sampleIDList,featuresVectorList,matchingNodes]
+#@dataArray = [samplesInfoList,infoList,sampleIDList,idSequences,matchingNodes]
 
 #Computes Bayes's theorem
 #Uses an hypothesis of Bernouilli naive distribution (that is, we are assuming the independance between the values of metadata) + equiprobability of being in one of the classes (that is, we are assuming that a sample can be equiprobably take one of the values of the total set of values of the metadatum), which are quite strong hypotheses (for a clearer explanation, see README)
@@ -20,14 +20,14 @@ def probabilityKnowingClass(nodesList,assignedClasses,dataArray,numberClass,numb
             for sample in class1:
                 indexSample = 0
                 #@dataArray[8] = @matchingNodes
-                while indexSample < numberMatching and not (sample == dataArray[5][indexSample][0]):
+                while indexSample < numberMatching and not (sample == dataArray[4][indexSample][0]):
                     indexSample += 1
                 if indexSample == numberMatching:
                     print "\n/!\ ERROR: This sample",sample,"is not in matchingNodes."
                     raise ValueError
                 #@nodesPresence[nod][cl] == 1 or 0
                 numberNodeAppearsInClass += nodesPresence[nod][indexSample]
-                numberNodeInClass += len(dataArray[8][indexSample][1])
+                numberNodeInClass += len(dataArray[4][indexSample][1])
             probKnowingClass[nod][cl] = probList[nod]**numberNodeAppearsInClass + (1 - probList[nod])**(numberNodeInClass - numberNodeAppearsInClass)
             cl += 1
         nod += 1
@@ -67,7 +67,7 @@ def classifyIt(dataArray,metadatum,nodesList,numberStartingSamples):
     classes,valueSet,assignedClasses,unchosen,probList,nodesPresence = trainingPart(dataArray,metadatum,nodesList,numberStartingSamples)
     numberClass = len(classes)
     numberNodes = len(nodesList)
-    numberMatching = len(dataArray[8])
+    numberMatching = len(dataArray[4])
     if not (len(numberClass) == len(assignedClasses)):
         print "\n/!\ ERROR: Length error: classes:",numberClass,"assignedClasses",len(assignedClasses),"."
         raise ValueError

@@ -59,7 +59,7 @@ def plotHist(xArray,xLabel="X",yLabel="f(X)",maxx=10,minx=0,maxy=10,miny=0,title
 
 #@labels is the array containing the labels of the pie (can go up to 14 different labels)
 #@sizes is the arrays of parts of the pie owned by the different labels
-def plotPie(labels,sizes,title):
+def plotPieChart(labels,sizes,title):
     initColors = ['gold','yellowgreen','lightcoral','lightskyblue','violet','blue','pink','red','orange','green','gray','brown','yellow','chartreuse','burlywood','cyan','magenta','white']
     n = len(labels)
     if not (n == len(sizes)):
