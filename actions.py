@@ -112,7 +112,7 @@ def randomSubSamplingAct(dataArray):
         print "\n/!\ ERROR: s and n must both be integers."
         raise ValueError
     numberSamples = len(dataArray[0])
-    numberStartingSamples = sanitize(raw_input("Knowing there is/are " + str(numberSamples) + "sample(s), how many samples do you want to create the training set?"))
+    numberStartingSamples = sanitize(raw_input("Knowing there is/are " + str(numberSamples) + "sample(s), how many samples do you want to create the training set? \n"))
     x = integer.match(numberStartingSamples)
     if not x or (x and int(numberStartingSamples) > numberSamples):
         print "\n/!\ ERROR: You should write down an integer."
