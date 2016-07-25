@@ -111,8 +111,8 @@ def randomSubSamplingAct(dataArray):
     if not integer.match(s) or not integer.match(n):
         print "\n/!\ ERROR: s and n must both be integers."
         raise ValueError
-    numberStartingSamples = sanitize(raw_input("Knowing there is/are " + str(dataArray[0]) + "sample(s), how many samples do you want to create the training set?"))
     numberSamples = len(dataArray[0])
+    numberStartingSamples = sanitize(raw_input("Knowing there is/are " + str(numberSamples) + "sample(s), how many samples do you want to create the training set?"))
     x = integer.match(numberStartingSamples)
     if not x or (x and int(numberStartingSamples) > numberSamples):
         print "\n/!\ ERROR: You should write down an integer."
@@ -131,7 +131,6 @@ def randomSubSamplingAct(dataArray):
         nodesList = randomChoice(listnodes,n)
         assignedClasses,classes,valueSet = classifyIt(dataArray,metadatum,nodesList,numberStartingSamples)
         numberClass = len(classes)
-        #len(dataArray[0])?
         youdenJ = countYouden(assignedClasses,classes,numberSamples)
         res = numberClass - youdenJ
         if min(res,currBestYouden) == res:

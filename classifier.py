@@ -17,24 +17,27 @@ def probabilityKnowingClass(nodesList,assignedClasses,dataArray,numberClass,numb
         for class1 in assignedClasses:
             numberNodeInClass = 0
             numberNodeAppearsInClass = 0
+            if not class1:
+                continue
             for sample in class1:
                 indexSample = 0
-                #@dataArray[8] = @matchingNodes
-                while indexSample < numberMatching and not (sample == dataArray[4][indexSample][0]):
+                while indexSample < len(dataArray[0]) and not (sample == dataArray[0][indexSample][0]):
                     indexSample += 1
-                if indexSample == numberMatching:
-                    print "\n/!\ ERROR: This sample",sample,"is not in matchingNodes."
+                if indexSample == len(dataArray[0]):
+                    print "\n/!\ ERROR: This sample",sample,"is not in the list of samples."
                     raise ValueError
+                #@dataArray[4] = @matchingNodes
+                listnodesmatched = dataArray[4].get(sample)
                 #@nodesPresence[nod][cl] == 1 or 0
                 numberNodeAppearsInClass += nodesPresence[nod][indexSample]
-                numberNodeInClass += len(dataArray[4][indexSample][1])
+                if listnodesmatched:
+                    numberNodeInClass += len(listnodesmatched)
             probKnowingClass[nod][cl] = probList[nod]**numberNodeAppearsInClass + (1 - probList[nod])**(numberNodeInClass - numberNodeAppearsInClass)
             cl += 1
         nod += 1
     return probKnowingClass
 
 def bayesCalculus(sample,nodesList,dataArray,assignedClasses,numberClass,numberNodes,numberMatching,probList,nodesPresence):
-    postMeasures = [0]*numberClass
     #Equiprobability (could also be computed using the training subset, but we should have dealt with the zero probabilities)
     #with the bayesian average used for probabilities of having a node, but it would be as irrelevant, because interaction between
     #metadata values are depending on the real definition of the metadata (see data matrix)
@@ -43,7 +46,7 @@ def bayesCalculus(sample,nodesList,dataArray,assignedClasses,numberClass,numberN
         raise ValueError
     probBeingInClass = 1/numberClass
     probKnowingClass = probabilityKnowingClass(nodesList,assignedClasses,dataArray,numberClass,numberNodes,probList,nodesPresence,numberMatching)
-    probWithoutEvidence = []
+    probWithoutEvidence = [None]*numberClass
     evidence = 0
     for cl in range(numberClass):
         #product of probabilities of having a node knowing the class
@@ -51,8 +54,14 @@ def bayesCalculus(sample,nodesList,dataArray,assignedClasses,numberClass,numberN
         for nod in range(numberNodes):
             product = product*probKnowingClass[nod][cl]
         evidence += probBeingInClass*product
-        probWithoutEvidence.append(product * probBeingInClass)
-    postMeasures[i] = 1/evidence * probWithoutEvidence[i]
+        probWithoutEvidence[cl] = product * probBeingInClass
+    postMeasures = [None]*numberClass
+    if not evidence:
+        print "\n/!\ ERROR: Zero-error for Bernouilli model."
+        raise ValueError
+    for i in range(numberClass):
+        if probWithoutEvidence:
+            postMeasures[i] = 1/evidence * probWithoutEvidence[i]
     return postMeasures
 
 #Returns @assignedClasses (partition of the whole set of samples according to node population)
@@ -68,11 +77,11 @@ def classifyIt(dataArray,metadatum,nodesList,numberStartingSamples):
     numberClass = len(classes)
     numberNodes = len(nodesList)
     numberMatching = len(dataArray[4])
-    if not (len(numberClass) == len(assignedClasses)):
+    if not (numberClass == len(assignedClasses)):
         print "\n/!\ ERROR: Length error: classes:",numberClass,"assignedClasses",len(assignedClasses),"."
         raise ValueError
     for sample in unchosen:
-        postMeasures = bayesCalculus(sample,nodesList,dataArray,assignedClasses,numberClass,numberNodes,numberMatching,probList,nodesPresence,numberMatching)
+        postMeasures = bayesCalculus(sample,nodesList,dataArray,assignedClasses,numberClass,numberNodes,numberMatching,probList,nodesPresence)
         #Gets the highest class probability in @postMeasures
         maxIndex = 0
         maxProb = 0
@@ -82,5 +91,8 @@ def classifyIt(dataArray,metadatum,nodesList,numberStartingSamples):
                 maxProb = postMeasures[i]
                 maxIndex = i
         #Assigning this sample to the class number @maxIndex
-        assignedClasses[maxIndex] = assignedClasses[maxIndex].append(sample)
+        if assignedClasses[maxIndex]:
+            assignedClasses[maxIndex].append(sample)
+        else:
+            assignedClasses[maxIndex] = [sample]
     return assignedClasses,classes,valueSet

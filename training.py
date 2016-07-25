@@ -10,7 +10,7 @@ import numpy as np
 def computeClasses(dataArray,metadatum):
     #Any value in @valueSet is an integer (see partitionSampleByMetadatumValue)
     #@classes is a list containing partition of the samples ID according to the value of the metadatum
-    valueSet,classes = partitionSampleByMetadatumValue([metadatum],dataArray[1],dataArray[0])
+    valueSet,classes = partitionSampleByMetadatumValue(metadatum,dataArray[1],dataArray[0])
     if not valueSet:
         print "\n/!\ ERROR: metadatum",metadatum,"having abnormal values."
         raise ValueError
@@ -21,8 +21,8 @@ def computeClasses(dataArray,metadatum):
 #Training step #1: selects a random subset of the set of features vectors (samples)
 #knuth=True uses Knuth's algorithm S, knuth=False uses Algorithm R
 def selectTrainingSample(dataArray,n,knuth=False):
-    #@dataArray[3] = sampleIDList, that matches samples in featuresVectorList
-    trainSubset,unchosen = randomChoice(dataArray[3].values(),n,knuth)
+    #@dataArray[0] = sampleInfoList
+    trainSubset,unchosen = randomChoice([sample[0] for sample in dataArray[0]],n,knuth)
     return trainSubset,unchosen
 
 #______________________________________________________________________________________________________
@@ -32,24 +32,27 @@ def selectTrainingSample(dataArray,n,knuth=False):
 #compute the Youden's J coefficient
 #returns @assignedClasses that is the partial partition of the set of samples restricted to the samples in @trainSubset
 def assignClass(trainSubset,classes):
-    classLength = [ len(class1) for class1 in classes ]
-    assignedClasses = [ [] for _ in classes ]
+    assignedClasses = [ None for _ in classes ]
     for sampleID in trainSubset:
         numberClass = 0
         for class1 in classes:
             i = 0
-            while i < classLength[numberClass] and not (sampleID == classes[numberClass][i]):
+            classLength = len(class1)
+            while i < classLength and not (sampleID == class1[i][0]):
                 i += 1
-            if (i == classLength[numberClass]):
+            if (i == classLength):
                 #Search in next class
                 numberClass += 1
             else:
                 break
-        if (i == classLength[-1]):
-                print "\n/!\ ERROR: Sample ID",sampleID,"is not in the classes",classes[0],"\nnor",classes[1],"."
-                raise ValueError
+        #It means the sample has not been classed, meaning the value of metadatum for this sample is unknown
+        if (i == classLength):
+            continue
         else:
-            assignedClasses[numberClass] = assignedClasses[numberClass].append(sampleID)
+            if assignedClasses[numberClass]:
+                assignedClasses[numberClass].append(sampleID)
+            else:
+                assignedClasses[numberClass] = [sampleID]
     return assignedClasses
 
 #______________________________________________________________________________________________________
@@ -75,21 +78,18 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
     n = len(dataArray[4])
     #@nodesPresence is a list such as @nodesPresence[i][j] = 1 if node nodesList[i] matches in sample matchingNodes[j][0]
     #@dataArray[4] = @matchingNodes
-    nodesPresence = [[0]*len(dataArray[4])]*numberNodes
+    nodesPresence = [[0]*n]*numberNodes
     #@nodesPositive is a list such as @nodesPositive[i] is the number of samples in the training subset containing node @nodesList[i]
     nodesPositive = [0]*numberNodes
     for sample in trainSubset:
         j = 0
-        while j < n and not (sample == dataArray[4][j][0]):
-            if not (len(dataArray[4][j]) == 2):
-                print "\n/!\ ERROR: Pair length error:",len(pair),"."
-                raise ValueError
+        while j < len(dataArray[0]) and not (sample == dataArray[0][j][0]):
             j += 1
-        if (j == n):
-            print "\n/!\ ERROR: Sample",sample,"not in matchingNodes."
+        if (j == len(dataArray[0])):
+            print "\n/!\ ERROR: Sample",sample,"not found."
             raise ValueError
-        else:
-            nodesSampleList = dataArray[4][j][1]
+        nodesSampleList = dataArray[4].get(sample)
+        if nodesSampleList:
             i = 0
             for node in nodesList:
                 nodesPresence[i][j] = int((node in nodesSampleList))
@@ -100,11 +100,11 @@ def getPriorProbability(nodesList,trainSubset,dataArray):
     for i in range(numberNodes):
         M = nodesPositive[i]/numberSstart
         v = 0
-        for j in range(numberStart):
+        for j in range(numberSstart):
             v += (nodesPresence[i][j]-M)*(nodesPresence[i][j]-M)
         v = np.sqrt(v)
         c = numberSstart/(2*(v+1))
-        m = C/numberSstart
+        m = c/numberSstart
         probList.append((c*m+nodesPositive[i])/(c+numberSstart))
     return probList,nodesPresence
 
@@ -117,6 +117,6 @@ def trainingPart(dataArray,metadatum,nodesList,numberStartingSamples):
     classes,valueSet = computeClasses(dataArray,metadatum)
     trainSubset,unchosen = selectTrainingSample(dataArray,numberStartingSamples)
     probList,nodesPresence = getPriorProbability(nodesList,trainSubset,dataArray)
-    assignedClasses = assignClass(dataArray,trainSubset,classes)
+    assignedClasses = assignClass(trainSubset,classes)
     return classes,valueSet,assignedClasses,unchosen,probList,nodesPresence
     
