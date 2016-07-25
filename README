@@ -55,6 +55,7 @@ Details about the files:
 **** classifier.py ****
 
 **** featuresVector.py ****
+Construct the list of matching nodes for each patient.
 
 **** /files ****
 Stores written files using writeOnFiles functions.
@@ -79,6 +80,13 @@ Parses MATCH files stored at /meta/match.
 
 **** plottingValues.py ****
 Draws pies.
+
+**** preformat.py ****
+Formats the raw .match files in order to parse them later. 
+Stores the resulting .test files at /meta/match/testfiles.
+
+**** script_format.sh & script_format_per_file.sh ****
+Bash scripts used by preformat module. Should not be modified.
 
 **** randomSampling.py ****
 Chooses randomly a certain number of elements in a set.
