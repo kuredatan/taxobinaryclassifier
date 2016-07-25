@@ -32,8 +32,11 @@ def probabilityKnowingClass(nodesList,assignedClasses,dataArray,numberClass,numb
                 numberNodeAppearsInClass += nodesPresence[nod][indexSample]
                 if listnodesmatched:
                     numberNodeInClass += len(listnodesmatched)
-            probKnowingClass[nod][cl] = probList[nod]**numberNodeAppearsInClass + (1 - probList[nod])**(numberNodeInClass - numberNodeAppearsInClass)
+            term1 = probList[nod]**numberNodeAppearsInClass
+            term2 = (1 - probList[nod])**(numberNodeInClass - numberNodeAppearsInClass)
+            probKnowingClass[nod][cl] = term1 + term2
             cl += 1
+        cl = 0
         nod += 1
     return probKnowingClass
 
